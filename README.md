@@ -59,3 +59,9 @@ note のエディタは表に対応していないため、見出し・箇条書
 内閣府 経済社会総合研究所（ESRI）の四半期GDP速報、総務省の消費者物価指数（e-Stat API）、日本銀行の時系列統計（API）をもとに、Holston-Laubach-Williams（HLW）型モデルで日本の自然利子率を推計した記事です。
 
 - `自然利子率/01_HLW型モデルで日本の自然利子率を推計する.md`（グラフ：`01_chart_rstar.png`、推計コード：`01_hlw_japan.py`、作図コード：`01_plot.py`）
+
+## 実質円安と賃金
+
+RIETI ディスカッション・ペーパー（菊池信之輔「Balassa–Samuelson in the Long Run」26-E-012）の紹介と、BIS の実効為替レート（FRED）、OECD の平均賃金・購買力平価・国民経済計算、厚生労働省「毎月勤労統計調査」（e-Stat）、日本銀行の輸出・輸入物価指数（API）、米国の原産国別輸入物価指数（FRED）をもとにした記事です。
+
+- `実質円安と賃金/01_実質円安の正体は賃金だった.md`（グラフ：`01_chart_japan.png`、`01_chart_scatter.png`、`01_chart_wagegap.png`、`01_chart_tot.png`、`01_chart_exportprice.png`）
