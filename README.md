@@ -73,3 +73,9 @@ note のエディタは表に対応していないため、見出し・箇条書
 RIETI ディスカッション・ペーパー（菊池信之輔「Balassa–Samuelson in the Long Run」26-E-012）の紹介と、BIS の実効為替レート（FRED）、OECD の平均賃金・購買力平価・国民経済計算、厚生労働省「毎月勤労統計調査」（e-Stat）、日本銀行の輸出・輸入物価指数（API）、米国の原産国別輸入物価指数（FRED）をもとにした記事です。
 
 - `実質円安と賃金/01_実質円安の正体は賃金だった.md`（グラフ：`01_chart_japan.png`、`01_chart_scatter.png`、`01_chart_wagegap.png`、`01_chart_tot.png`、`01_chart_exportprice.png`）
+
+## 供給と需要の構造変化
+
+日本銀行「需給ギャップと潜在成長率」と、内閣府 経済社会総合研究所（ESRI）の四半期GDP速報をもとに、潜在GDPと実質家計消費のトレンドの変化点を構造変化検定（折れ線トレンド回帰、Quandt-Andrews の supF 検定）で調べた記事です。
+
+- `供給と需要の構造変化/01_リーマンは供給を、消費税は消費を壊したのか.md`（グラフ：`01_chart_level.png`、`01_chart_slope.png`、推計・作図コード：`code/`）
