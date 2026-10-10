@@ -10,7 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-plt.rcParams["font.family"] = "Noto Sans JP"
+plt.rcParams["font.family"] = ["Noto Sans JP", "IPAGothic"]   # 入っているほうを使う
 INK, MUTED, GRID, SURF = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "03_chart_multipliers.png"
