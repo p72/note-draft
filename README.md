@@ -114,3 +114,9 @@ OECD「Productivity Database」（SDMX API）、日本生産性本部「労働�
 2008年の社会保障国民会議の資料（厚生労働省）をもとにした記事です。
 
 - [社会保障国民会議/01\_2008年のシミュレーション](https://p72.github.io/note-draft/%E7%A4%BE%E4%BC%9A%E4%BF%9D%E9%9A%9C%E5%9B%BD%E6%B0%91%E4%BC%9A%E8%AD%B0/01_2008%E5%B9%B4%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3.html)（[GitHub](https://github.com/p72/note-draft/blob/main/%E7%A4%BE%E4%BC%9A%E4%BF%9D%E9%9A%9C%E5%9B%BD%E6%B0%91%E4%BC%9A%E8%AD%B0/01_2008%E5%B9%B4%E3%81%AE%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3.md)）（年金と医療・介護の2つのシミュレーションの概要をまとめた記事）
+
+## 短観の物価見通し
+
+日本銀行「短観」の企業の物価見通しと、日本銀行の企業物価指数・企業向けサービス価格指数（API）、総務省の消費者物価指数（e-Stat API）をもとにした記事です。
+
+- [短観の物価見通し/01\_販売価格見通しの5年後6.1％は年率1.2％にすぎない](https://p72.github.io/note-draft/%E7%9F%AD%E8%A6%B3%E3%81%AE%E7%89%A9%E4%BE%A1%E8%A6%8B%E9%80%9A%E3%81%97/01_%E8%B2%A9%E5%A3%B2%E4%BE%A1%E6%A0%BC%E8%A6%8B%E9%80%9A%E3%81%97%E3%81%AE5%E5%B9%B4%E5%BE%8C6.1%EF%BC%85%E3%81%AF%E5%B9%B4%E7%8E%871.2%EF%BC%85%E3%81%AB%E3%81%99%E3%81%8E%E3%81%AA%E3%81%84.html)（[GitHub](https://github.com/p72/note-draft/blob/main/%E7%9F%AD%E8%A6%B3%E3%81%AE%E7%89%A9%E4%BE%A1%E8%A6%8B%E9%80%9A%E3%81%97/01_%E8%B2%A9%E5%A3%B2%E4%BE%A1%E6%A0%BC%E8%A6%8B%E9%80%9A%E3%81%97%E3%81%AE5%E5%B9%B4%E5%BE%8C6.1%EF%BC%85%E3%81%AF%E5%B9%B4%E7%8E%871.2%EF%BC%85%E3%81%AB%E3%81%99%E3%81%8E%E3%81%AA%E3%81%84.md)）（販売価格の見通しは「現在の水準と比べた変化率」なので、1年先・3年先・5年先を並べたグラフでは5年先が必ず上に来る。年率に直すと5年先6.1％は約1.2％で、値上げは最初の1年に集中していることを、見通しを調査時点から伸ばして実績と重ねるヘアリーチャートで示す。グラフ：`01_chart_hairy_general.png`、`01_chart_hairy_sales_all.png`、`01_chart_hairy_sales_sector.png`、作図コード：`01_plot.py`）
