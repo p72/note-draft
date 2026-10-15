@@ -1,5 +1,9 @@
 # HLW型モデルで日本の自然利子率を推計する──潜在成長率は0.6％、r*は0.8％、ただし誤差は±2.5％
 
+ウェブ版：[https://p72.github.io/note-draft/自然利子率/01\_HLW型モデルで日本の自然利子率を推計する.html](https://p72.github.io/note-draft/%E8%87%AA%E7%84%B6%E5%88%A9%E5%AD%90%E7%8E%87/01_HLW%E5%9E%8B%E3%83%A2%E3%83%87%E3%83%AB%E3%81%A7%E6%97%A5%E6%9C%AC%E3%81%AE%E8%87%AA%E7%84%B6%E5%88%A9%E5%AD%90%E7%8E%87%E3%82%92%E6%8E%A8%E8%A8%88%E3%81%99%E3%82%8B.html)
+
+GitHub：[https://github.com/p72/note-draft/blob/main/自然利子率/01\_HLW型モデルで日本の自然利子率を推計する.md](https://github.com/p72/note-draft/blob/main/%E8%87%AA%E7%84%B6%E5%88%A9%E5%AD%90%E7%8E%87/01_HLW%E5%9E%8B%E3%83%A2%E3%83%87%E3%83%AB%E3%81%A7%E6%97%A5%E6%9C%AC%E3%81%AE%E8%87%AA%E7%84%B6%E5%88%A9%E5%AD%90%E7%8E%87%E3%82%92%E6%8E%A8%E8%A8%88%E3%81%99%E3%82%8B.md)
+
 ※ この記事は、内閣府 経済社会総合研究所（ESRI）の四半期GDP速報、総務省の消費者物価指数（e-Stat API）、日本銀行の時系列統計（API）の公表データを使い、Python で推計しています。推計コードは同じフォルダの `01_hlw_japan.py` です。
 
 ## 要旨

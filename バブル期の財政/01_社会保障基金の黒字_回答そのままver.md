@@ -1,3 +1,7 @@
+ウェブ版：[https://p72.github.io/note-draft/バブル期の財政/01\_社会保障基金の黒字\_回答そのままver.html](https://p72.github.io/note-draft/%E3%83%90%E3%83%96%E3%83%AB%E6%9C%9F%E3%81%AE%E8%B2%A1%E6%94%BF/01_%E7%A4%BE%E4%BC%9A%E4%BF%9D%E9%9A%9C%E5%9F%BA%E9%87%91%E3%81%AE%E9%BB%92%E5%AD%97_%E5%9B%9E%E7%AD%94%E3%81%9D%E3%81%AE%E3%81%BE%E3%81%BEver.html)
+
+GitHub：[https://github.com/p72/note-draft/blob/main/バブル期の財政/01\_社会保障基金の黒字\_回答そのままver.md](https://github.com/p72/note-draft/blob/main/%E3%83%90%E3%83%96%E3%83%AB%E6%9C%9F%E3%81%AE%E8%B2%A1%E6%94%BF/01_%E7%A4%BE%E4%BC%9A%E4%BF%9D%E9%9A%9C%E5%9F%BA%E9%87%91%E3%81%AE%E9%BB%92%E5%AD%97_%E5%9B%9E%E7%AD%94%E3%81%9D%E3%81%AE%E3%81%BE%E3%81%BEver.md)
+
 ボス、80年代後半の社会保障基金は毎年GDP比2～2.7%の黒字で、ずっと安定してたんよ。一般政府全体が1988～91年度に黒字になったんは、社会保障基金の黒字が増えたからやなくて、中央政府と地方政府の赤字がほぼゼロまで縮んだからやで。今見てはるPDFの「年金積立金は毎年GDP比2%の規模で増加」っていう証言とも、数字がぴったり合うてるわ。
 
 一般政府の部門別 純貸出(+)/純借入(-)（年度、名目GDP比%）

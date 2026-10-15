@@ -1,5 +1,9 @@
 # 生産性は3割伸びたが、消費者物価で測った実質報酬は1割半──日本と韓国のCPIとGDPデフレーターの差
 
+ウェブ版：[https://p72.github.io/note-draft/交易条件とデフレ/02\_CPIとGDPデフレーターの差と実質賃金.html](https://p72.github.io/note-draft/%E4%BA%A4%E6%98%93%E6%9D%A1%E4%BB%B6%E3%81%A8%E3%83%87%E3%83%95%E3%83%AC/02_CPI%E3%81%A8GDP%E3%83%87%E3%83%95%E3%83%AC%E3%83%BC%E3%82%BF%E3%83%BC%E3%81%AE%E5%B7%AE%E3%81%A8%E5%AE%9F%E8%B3%AA%E8%B3%83%E9%87%91.html)
+
+GitHub：[https://github.com/p72/note-draft/blob/main/交易条件とデフレ/02\_CPIとGDPデフレーターの差と実質賃金.md](https://github.com/p72/note-draft/blob/main/%E4%BA%A4%E6%98%93%E6%9D%A1%E4%BB%B6%E3%81%A8%E3%83%87%E3%83%95%E3%83%AC/02_CPI%E3%81%A8GDP%E3%83%87%E3%83%95%E3%83%AC%E3%83%BC%E3%82%BF%E3%83%BC%E3%81%AE%E5%B7%AE%E3%81%A8%E5%AE%9F%E8%B3%AA%E8%B3%83%E9%87%91.md)
+
 ※ この記事は、OECD「Economic Outlook」の日本と韓国の年次データ（日本は1960〜2025年、韓国は1965〜2025年）を使って計算している。
 
 「日本は生産性が伸びても賃金が上がらない国だ」という指摘は多い。しかし、その「実質賃金」を何の物価で割ったのかによって、結論は大きく変わる。

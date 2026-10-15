@@ -1,5 +1,9 @@
 # 日英のGDP逆転と時間当たり労働生産性──水準の差は広がったが、実質の伸びは日本が上回っていた
 
+ウェブ版：[https://p72.github.io/note-draft/日英のGDPと労働生産性/01\_日英のGDP逆転と時間当たり労働生産性.html](https://p72.github.io/note-draft/%E6%97%A5%E8%8B%B1%E3%81%AEGDP%E3%81%A8%E5%8A%B4%E5%83%8D%E7%94%9F%E7%94%A3%E6%80%A7/01_%E6%97%A5%E8%8B%B1%E3%81%AEGDP%E9%80%86%E8%BB%A2%E3%81%A8%E6%99%82%E9%96%93%E5%BD%93%E3%81%9F%E3%82%8A%E5%8A%B4%E5%83%8D%E7%94%9F%E7%94%A3%E6%80%A7.html)
+
+GitHub：[https://github.com/p72/note-draft/blob/main/日英のGDPと労働生産性/01\_日英のGDP逆転と時間当たり労働生産性.md](https://github.com/p72/note-draft/blob/main/%E6%97%A5%E8%8B%B1%E3%81%AEGDP%E3%81%A8%E5%8A%B4%E5%83%8D%E7%94%9F%E7%94%A3%E6%80%A7/01_%E6%97%A5%E8%8B%B1%E3%81%AEGDP%E9%80%86%E8%BB%A2%E3%81%A8%E6%99%82%E9%96%93%E5%BD%93%E3%81%9F%E3%82%8A%E5%8A%B4%E5%83%8D%E7%94%9F%E7%94%A3%E6%80%A7.md)
+
 ※ この記事は、IMF「World Economic Outlook」の数値（報道経由）、日本生産性本部「労働生産性の国際比較 2025」、OECD Productivity Database の公表データを使っている。
 
 日本と英国の名目GDPが近い将来逆転するという見通しが話題になっている。ドル建ての名目GDPで日本はドイツに抜かれ、インドとの順位も入れ替わりを繰り返しており、次は英国だというわけである。

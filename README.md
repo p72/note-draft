@@ -2,6 +2,12 @@
 
 note に投稿する記事の原稿置き場です。
 
+ウェブ版（GitHub Pages）：[https://p72.github.io/note-draft/](https://p72.github.io/note-draft/)
+
+GitHub リポジトリ：[https://github.com/p72/note-draft](https://github.com/p72/note-draft)
+
+各記事の冒頭に、その記事のウェブ版と GitHub 上の原稿へのリンクを入れています。
+
 ## 年金部会
 
 厚生労働省 社会保障審議会年金部会の議事録を発言単位で整理したデータベース（[p72/nenkin-bukai-minutes-database](https://github.com/p72/nenkin-bukai-minutes-database)）をもとにした記事です。
