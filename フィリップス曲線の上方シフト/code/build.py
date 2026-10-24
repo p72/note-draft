@@ -24,7 +24,7 @@ g=pd.read_excel('gap.xlsx',sheet_name='data1',header=None).iloc[5:,[0,1]]
 g.columns=['q','gap']; g=g.dropna()
 g.index=pd.PeriodIndex([x.split('.')[0]+'Q'+x.split('.')[1][0] for x in g.q.astype(str)],freq='Q')
 g=g['gap'].astype(float)
-out=q.join(t['cons_DI']).join(g.shift(2).rename('gap_lead2'))
+out=q.join(t['cons_DI']).join(pd.Series(g.values,index=g.index+2,name='gap_lead2'))
 out=out[(out.index>=pd.Period('2004Q1'))]
 out.to_csv('panel.csv')
 print(out.loc['2012Q4':].round(2).to_string())

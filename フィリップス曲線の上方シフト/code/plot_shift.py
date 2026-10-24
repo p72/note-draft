@@ -22,5 +22,5 @@ for i,lab in enumerate(labs):
 ax.axhline(0,color='black',lw=0.9); ax.set_xticks(range(len(labs))); ax.set_xticklabels(labs,fontsize=11); ax.set_xlim(-0.6,1.6)
 ax.set_ylabel('2022年4-6月期以降の上振れ幅（%ポイント）'); ax.grid(axis='y',alpha=0.3); ax.legend(frameon=False,fontsize=9,loc='upper left')
 ax.set_title('物差しによって変わる「上方シフト」の大きさ',loc='left',fontsize=13)
-fig.text(0.01,0.005,'注：欧米型コアCPI（携帯除く）前年比を、需給・輸入物価（2〜4期前）・消費税とコロナ期のダミー・2022年4-6月期以降のダミーで回帰したときの\n　　最後のダミーの係数。縦線は95%信頼区間（HAC標準誤差）で、0をまたがなければ統計的に有意。出所：総務省、日本銀行を基に作成',fontsize=7.5,color='#555555')
+fig.text(0.01,0.005,'注：欧米型コアCPI（携帯除く）前年比を、需給・輸入物価（2〜4期前）・消費税とコロナ期のダミー・2022年4-6月期以降のダミーで回帰したときの最後のダミーの係数。\n　　2つの物差しで同じ標本（共通の四半期）を使用。縦線は95%信頼区間（HAC標準誤差）で、0をまたがなければ統計的に有意。出所：総務省、日本銀行を基に作成',fontsize=7.5,color='#555555')
 plt.tight_layout(rect=(0,0.07,1,1)); plt.savefig(os.path.join(here,'..','01_chart_shift.png'),dpi=150)

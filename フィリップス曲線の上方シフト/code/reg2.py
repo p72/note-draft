@@ -14,7 +14,7 @@ idx=d.dropna(subset=['core_exmob','cons_DI','imp_l24','wage_l1']).index
 for i in range(40,len(idx)+1):
     w=idx[i-40:i]; s=d.loc[w]
     cols=['cons_DI','imp_l24']+[c for c in D if s[c].nunique()>1]
-    m=sm.OLS(s.core_exmob,sm.add_constant(s[cols])).fit()
+    m=sm.OLS(s.core_exmob,sm.add_constant(s[cols])).fit(cov_type='HAC',cov_kwds={'maxlags':4})
     pos=m.params['const']+m.params['cons_DI']*(-15)
     se=np.sqrt(np.array([1,-15])@m.cov_params().loc[['const','cons_DI'],['const','cons_DI']].values@np.array([1,-15]))
     out.append((w[-1],pos,se,m.params['cons_DI']))
