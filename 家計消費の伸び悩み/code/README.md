@@ -27,7 +27,7 @@ python 家計消費の伸び悩み/code/review_reproduce.py
 ## 原本取得と検証の範囲
 
 - 取得日：2026-10-26（日本時間）。内閣府の2026年10月9日公表、2026年4〜6月期速報値、2020年基準・2008SNA。
-- URL：https://www.esri.cao.go.jp/jp/sna/data/data_list/kakei/files/2026/tables/kakei_26q2.xlsx
+- URL：[https://www.esri.cao.go.jp/jp/sna/data/data\_list/kakei/files/2026/tables/kakei\_26q2.xlsx](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakei/files/2026/tables/kakei_26q2.xlsx)
 - SHA-256：`75fa03e0a4eb1058916d4a903fe15f6efb48437da45f5a2d073ecad3cf21a571`
 - 季調系列シートの営業余剰から実質可処分所得までの13系列を `levels3.csv` と照合し、1994Q1〜2026Q2の130四半期すべて一致した。金額は年率、単位は10億円。貯蓄率は％。
 - 元稿のSNA・資金循環・家計調査・CSIのうち、このExcelに含まれない原データ全体の再取得・照合は行っていない。今回の数値検証は主に保存加工CSVに基づく。
