@@ -1,0 +1,18 @@
+{
+  "longrun_rows_verified": 27,
+  "income_rows_verified": 18,
+  "pension_rows_verified": 21,
+  "max_identity_residual": 3.552713678800501e-14,
+  "japan_pension_2024_yoy_pct": 1.965322949968451,
+  "japan_2022_2024": {
+    "area": "JPN",
+    "period": "2022-2024",
+    "real_C_pc": 0.4039434646448232,
+    "nomYd_pc": 4.711945599138843,
+    "prices": 5.873012197543,
+    "realYd_pc": -1.1610665984041573,
+    "APC": 1.5650100630489838,
+    "nomComp_pc": 6.263779040794282,
+    "resid": -3.552713678800501e-15
+  }
+}
