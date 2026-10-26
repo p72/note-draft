@@ -6,7 +6,17 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import japanize_matplotlib  # noqa: F401
+from matplotlib import font_manager
+
+def _setup_jp_font():
+    """環境内の日本語フォント（Noto CJK など）を探して設定する。見つからなければ既定フォントのまま。"""
+    for name in ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAexGothic', 'IPAGothic', 'Hiragino Sans', 'Yu Gothic', 'Meiryo']:
+        if any(f.name == name for f in font_manager.fontManager.ttflist):
+            plt.rcParams['font.family'] = name
+            return name
+    return None
+
+_setup_jp_font()
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent.parent
@@ -140,7 +150,7 @@ y=np.arange(len(g))
 ax[1].barh(y-.2,g.nominal,.4,label='名目の伸び（65歳以上人口当たり）')
 ax[1].barh(y+.2,g.prices,.4,label='家計消費デフレーター上昇')
 ax[1].plot(g.real,y,'kD',label='実質変化')
-ax[1].set_yticks(y,[N[x] for x in g.index]);ax[1].legend(fontsize=9,ncol=2)
+ax[1].set_yticks(y,[N[x] for x in g.index]);ax[1].legend(fontsize=9,ncol=3,loc='upper center',bbox_to_anchor=(.5,-.08),frameon=False)
 ax[1].axvline(0,color='gray',lw=.6)
 ax[1].set_title('② 2019→2024年：名目給付の伸びと物価（対数％）')
 g=PR[PR.area=='JPN'].set_index('period');x=np.arange(len(g))
