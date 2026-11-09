@@ -90,6 +90,14 @@ Winny のプロトコル仕様は公式には公開されていない。ただ�
 
 Winny は、少なくとも2026年11月9日のこの観測に関する限り、まだ生きている。
 
+## コードの公開
+
+観測に使用したクライアントのコードと、精読から作成したプロトコル仕様メモは、本稿のフォルダ内の `code/` に公開した。
+
+GitHub：[https://github.com/p72/note-draft/tree/main/Winnyノード観測/code](https://github.com/p72/note-draft/tree/main/Winny%E3%83%8E%E3%83%BC%E3%83%89%E8%A6%B3%E6%B8%AC/code)
+
+含まれるのは、コーデック、ハンドシェイク、クローラ、入口確認用スクリプト、模擬ノードとテスト、および仕様メモ（PROTOCOL.md）である。一方、入口ノードの一覧と観測ログは、接続先ノードのアドレスを含むため公開していない。取得したキー情報の具体的なファイル名も同様である。コードは観測専用の設計であり、ファイルの実体を送受信する機能は含まれていない。
+
 ## 参考資料
 
 - 再構成ソース（GitHub）：[https://github.com/loadletter/Winny-p2p](https://github.com/loadletter/Winny-p2p)
