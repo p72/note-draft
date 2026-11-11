@@ -212,7 +212,7 @@ Metaの個人AIエージェント「Muse」の公式仕様と、実際に2日間
 
 令和8年度予算フレームの確認、税収90兆円前提での一般会計財政収支の推定、資金循環統計による一般政府の資金過不足の推定、一般会計と資金循環の概念差（ウェッジ）の分析を行った、2026年11月3日のチャット問答の記録です。
 
-- [財政収支の推計/01\_令和8年度予算フレームと一般政府資金過不足の問答ログ](https://p72.github.io/note-draft/%E8%B2%A1%E6%94%BF%E5%8F%8E%E6%94%AF%E3%81%AE%E6%8E%A8%E8%A8%88/01_%E4%BB%A4%E5%92%8C8%E5%B9%B4%E5%BA%A6%E4%BA%88%E7%AE%97%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%81%A8%E4%B8%80%E8%88%AC%E6%94%BF%E5%BA%9F%E8%B3%87%E9%87%91%E9%81%8E%E4%B8%8D%E8%B6%B3%E3%81%AE%E5%95%8F%E7%AD%94%E3%83%AD%E3%82%B0.html)（[GitHub](https://github.com/p72/note-draft/blob/main/%E8%B2%A1%E6%94%BF%E5%8F%8E%E6%94%AF%E3%81%AE%E6%8E%A8%E8%A8%88/01_%E4%BB%A4%E5%92%8C8%E5%B9%B4%E5%BA%A6%E4%BA%88%E7%AE%97%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%81%A8%E4%B8%80%E8%88%AC%E6%94%BF%E5%BA%9F%E8%B3%87%E9%87%91%E9%81%8E%E4%B8%8D%E8%B6%B3%E3%81%AE%E5%95%8F%E7%AD%94%E3%83%AD%E3%82%B0.md)）
+- [財政収支の推計/01\_令和8年度予算フレームと一般政府資金過不足の問答ログ](https://p72.github.io/note-draft/%E8%B2%A1%E6%94%BF%E5%8F%8E%E6%94%AF%E3%81%AE%E6%8E%A8%E8%A8%88/01_%E4%BB%A4%E5%92%8C8%E5%B9%B4%E5%BA%A6%E4%BA%88%E7%AE%97%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%81%A8%E4%B8%80%E8%88%AC%E6%94%BF%E5%BA%9C%E8%B3%87%E9%87%91%E9%81%8E%E4%B8%8D%E8%B6%B3%E3%81%AE%E5%95%8F%E7%AD%94%E3%83%AD%E3%82%B0.html)（[GitHub](https://github.com/p72/note-draft/blob/main/%E8%B2%A1%E6%94%BF%E5%8F%8E%E6%94%AF%E3%81%AE%E6%8E%A8%E8%A8%88/01_%E4%BB%A4%E5%92%8C8%E5%B9%B4%E5%BA%A6%E4%BA%88%E7%AE%97%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%81%A8%E4%B8%80%E8%88%AC%E6%94%BF%E5%BA%9C%E8%B3%87%E9%87%91%E9%81%8E%E4%B8%8D%E8%B6%B3%E3%81%AE%E5%95%8F%E7%AD%94%E3%83%AD%E3%82%B0.md)）
 
 ## インフレと原油高
 
