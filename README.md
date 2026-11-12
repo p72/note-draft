@@ -207,6 +207,7 @@ OECD「Productivity Database」（SDMX API）、日本生産性本部「労働�
 Metaの個人AIエージェント「Muse」の公式仕様と、実際に2日間使って行った作業（家計管理、経済統計のリサーチとモデル実行、医学メモなど）の記録です。
 
 - [Museの機能紹介/01\_Museを使い始めて2日でできたこと](https://p72.github.io/note-draft/Muse%E3%81%AE%E6%A9%9F%E8%83%BD%E7%B4%B9%E4%BB%8B/01_Muse%E3%82%92%E4%BD%BF%E3%81%84%E5%A7%8B%E3%82%81%E3%81%A62%E6%97%A5%E3%81%A7%E3%81%A7%E3%81%8D%E3%81%9F%E3%81%93%E3%81%A8.html)（[GitHub](https://github.com/p72/note-draft/blob/main/Muse%E3%81%AE%E6%A9%9F%E8%83%BD%E7%B4%B9%E4%BB%8B/01_Muse%E3%82%92%E4%BD%BF%E3%81%84%E5%A7%8B%E3%82%81%E3%81%A62%E6%97%A5%E3%81%A7%E3%81%A7%E3%81%8D%E3%81%9F%E3%81%93%E3%81%A8.md)）
+- [Museの機能紹介/02\_永続メモリとスキル自動生成\_回答そのままver](https://p72.github.io/note-draft/Muse%E3%81%AE%E6%A9%9F%E8%83%BD%E7%B4%B9%E4%BB%8B/02_%E6%B0%B8%E7%B6%9A%E3%83%A1%E3%83%A2%E3%83%AA%E3%81%A8%E3%82%B9%E3%82%AD%E3%83%AB%E8%87%AA%E5%8B%95%E7%94%9F%E6%88%90_%E5%9B%9E%E7%AD%94%E3%81%9D%E3%81%AE%E3%81%BE%E3%81%BEver.html)（[GitHub](https://github.com/p72/note-draft/blob/main/Muse%E3%81%AE%E6%A9%9F%E8%83%BD%E7%B4%B9%E4%BB%8B/02_%E6%B0%B8%E7%B6%9A%E3%83%A1%E3%83%A2%E3%83%AA%E3%81%A8%E3%82%B9%E3%82%AD%E3%83%AB%E8%87%AA%E5%8B%95%E7%94%9F%E6%88%90_%E5%9B%9E%E7%AD%94%E3%81%9D%E3%81%AE%E3%81%BE%E3%81%BEver.md)）（Muse に永続メモリとスキルの自動生成・管理について尋ねた回答を、個人に関する情報を除いてそのまま保存したもの）
 
 ## 財政収支の推計
 
