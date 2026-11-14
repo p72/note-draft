@@ -14,7 +14,10 @@
 - 3か月物OISの代わりに1年物（日本：財務省の国債1年、米国：GSWのゼロクーポン1年）。米国の2・10・30年もGSW
 - LPの s は東京17時のドル円（対数×100）。Δs_{t−1} は前日の17時→17時の変化
 - 会合日：日本銀行「決定事項」一覧の、各年の会合の公表文（k+日付のファイル）の日（2002〜2026年、299日）
-- 窓への寄与：窓の中の会合ごとに、窓の終わりまでの営業日数 h（30を超える場合は30）の反応を合計
+- 各会合の反応：論文と同じく h=0〜30 を表示
+- 期間への寄与（本稿の拡張）：LPを h=0〜120 まで推計し、各会合の反応 R(h)（会合前は0）について、
+  期末までの R(期末−会合) と期首前日までの R(期首前日−会合) の差を、期首前の会合も含めて合計する。
+  120営業日より先の反応は120日の値で一定と仮定する。区間は20営業日のブロック・ブートストラップ（200回）
 """
 import sys
 import numpy as np, pandas as pd, statsmodels.api as sm
@@ -23,6 +26,8 @@ END = "2023-12-31"
 for a in sys.argv[1:]:
     k, v = a.split("="); globals()[k] = v
 H = 30
+HL = 120
+NB = 200
 
 fx = pd.read_csv("usdjpy_tokyo_09_17.csv", index_col=0, parse_dates=True)
 jp = pd.read_csv("jgb_1_2_10_30.csv", index_col=0, parse_dates=True)
@@ -50,15 +55,16 @@ mp = sm.OLS(est.ds917, Xp).fit(cov_type="HAC", cov_kwds={"maxlags": 5})
 d["x"] = d.ds917 - sm.add_constant(d[Y + [f"{c}_l1" for c in Y] + ["ds917_l1"]]) @ mp.params
 
 # LP
-coef = {}
-for h in range(H + 1):
-    yv = d.s.shift(-h) - d.s.shift(1)
-    Z = sm.add_constant(d[Y + ["x"] + [f"{c}_l1" for c in Y] + ["ds_l1"]])
-    sub = pd.concat([yv.rename("y"), Z], axis=1).loc["2002-04-01":END].dropna()
-    r = sm.OLS(sub.y, sub.drop(columns="y")).fit(cov_type="HAC", cov_kwds={"maxlags": h + 1})
-    coef[h] = r.params
-coef = pd.DataFrame(coef).T
-
+ZC = Y + ["x"] + [f"{c}_l1" for c in Y] + ["ds_l1"]
+def lp(dd, Hmax):
+    out = {}
+    base = dd.loc["2002-04-01":END]
+    for h in range(Hmax + 1):
+        yv = (dd.s.shift(-h) - dd.s.shift(1)).loc[base.index]
+        sub = pd.concat([yv.rename("y"), sm.add_constant(base[ZC])], axis=1).dropna()
+        out[h] = np.linalg.lstsq(sub.drop(columns="y").values, sub.y.values, rcond=None)[0]
+    return pd.DataFrame(out, index=["const"] + ZC).T
+coef = lp(d, max(H, HL))
 mpm = pd.read_csv("boj_mpm_dates.csv", parse_dates=["date"])
 idx = d.index
 rows = []
@@ -67,22 +73,57 @@ for _, e in mpm.iterrows():
     t = idx.get_loc(e.date)
     epsy = -d.iloc[t][[f"dJP{m}" for m in M]].values.astype(float)     # 日本の金利の低下がプラス
     epss = d.iloc[t].x
-    A = np.array([coef.loc[h, Y].values @ epsy for h in range(H + 1)])
-    Bt = A + np.array([coef.loc[h, "x"] * epss for h in range(H + 1)])
+    A = np.array([coef.loc[h, Y].values @ epsy for h in range(HL + 1)])
+    Bt = A + np.array([coef.loc[h, "x"] * epss for h in range(HL + 1)])
     rows.append({"date": e.date.date(), "title": e.title, "ds917": d.iloc[t].ds917, "x_direct": epss,
                  **{f"dJP{m}_bp": d.iloc[t][f"dJP{m}"] * 100 for m in M},
                  "A_h0": A[0], "B_h0": Bt[0], "A_h5": A[5], "B_h5": Bt[5], "A_h30": A[30], "B_h30": Bt[30],
                  "_A": A, "_B": Bt, "_pos": t})
 ev = pd.DataFrame(rows)
 
+def contrib(ev_, a, z, key="_B"):
+    """期末と期首前日の差で見た、会合ショックの期間寄与（期首前の会合の持ち越しを含む）"""
+    b0 = idx.searchsorted(pd.Timestamp(a)) - 1; e = idx.searchsorted(pd.Timestamp(z), side="right") - 1
+    tot = 0.0
+    for _, r in ev_.iterrows():
+        t = r._pos
+        if t > e: continue
+        R = r[key]
+        re_ = R[min(e - t, HL)]; rb = R[min(b0 - t, HL)] if b0 >= t else 0.0
+        tot += re_ - rb
+    return tot
+
 def window(a, z):
+    b0 = idx.searchsorted(pd.Timestamp(a)) - 1; e = idx.searchsorted(pd.Timestamp(z), side="right") - 1
     w = ev[(pd.to_datetime(ev.date) >= a) & (pd.to_datetime(ev.date) <= z)]
-    endpos = idx.searchsorted(pd.Timestamp(z), side="right") - 1
-    totA = totB = 0.0
-    for _, r in w.iterrows():
-        h = int(min(H, endpos - r._pos)); totA += r._A[h]; totB += r._B[h]
-    s0 = d.s.iloc[idx.searchsorted(pd.Timestamp(a)) - 1]; s1 = d.s.iloc[endpos]
-    return {"window": f"{a}..{z}", "meetings": len(w), "fx_change": s1 - s0, "rate_shock_A": totA, "total_B": totB, "direct": totB - totA}
+    cA = contrib(ev, a, z, "_A"); cB = contrib(ev, a, z, "_B")
+    return {"window": f"{a}..{z}", "meetings_in_window": len(w), "fx_change": d.s.iloc[e] - d.s.iloc[b0],
+            "rate_shock_A": cA, "total_B": cB, "direct": cB - cA}
+
+def bootstrap(windows, nb=NB, block=20, seed=0):
+    """日をブロックで引き直して予測式とLPを再推計し、実際のショックに当てはめる"""
+    rng = np.random.default_rng(seed); base = d.loc["2002-04-01":END]
+    n = len(base); nblk = int(np.ceil(n / block)); res = {w: [] for w in windows}
+    Xcols = Y + [f"{c}_l1" for c in Y] + ["ds917_l1"]
+    lead = {h: (d.s.shift(-h) - d.s.shift(1)).loc[base.index].values for h in range(HL + 1)}
+    for b in range(nb):
+        st = rng.integers(0, n - block, nblk); pos = np.concatenate([np.arange(s0, s0 + block) for s0 in st])[:n]
+        bb = base.iloc[pos]
+        bp = np.linalg.lstsq(sm.add_constant(bb[Xcols]).values, bb.ds917.values, rcond=None)[0]
+        xb = d.ds917 - sm.add_constant(d[Xcols]).values @ bp
+        Zall = sm.add_constant(d[ZC].assign(x=xb)).loc[base.index].values[pos]
+        cf = []
+        for h in range(HL + 1):
+            yv = lead[h][pos]; ok = ~np.isnan(yv) & ~np.isnan(Zall).any(1)
+            cf.append(np.linalg.lstsq(Zall[ok], yv[ok], rcond=None)[0])
+        cf = pd.DataFrame(cf, columns=["const"] + ZC)
+        rows_ = []
+        for _, e in ev.iterrows():
+            t = e._pos; epsy = -d.iloc[t][[f"dJP{m}" for m in M]].values.astype(float); epss = xb.iloc[t]
+            A_ = cf[Y].values @ epsy; rows_.append({"_pos": t, "_A": A_, "_B": A_ + cf["x"].values * epss})
+        eb = pd.DataFrame(rows_)
+        for (a, z) in windows: res[(a, z)].append((contrib(eb, a, z, "_A"), contrib(eb, a, z, "_B")))
+    return res
 
 if __name__ == "__main__":
     tag = END[:4]
@@ -99,5 +140,11 @@ if __name__ == "__main__":
     if END > "2025":
         W = [("2021-01-01", "2023-09-15"), ("2023-09-16", "2025-09-30"), ("2025-10-01", "2026-02-27"),
              ("2026-03-01", "2026-11-05"), ("2025-10-01", "2026-11-05")]
-        wt = pd.DataFrame([window(a, z) for a, z in W]); print(wt.round(2).to_string()); wt.round(3).to_csv(f"boj_windows_{tag}.csv", index=False)
+        wt = pd.DataFrame([window(a, z) for a, z in W])
+        bs = bootstrap(W)
+        for i, w in enumerate(W):
+            arr = np.array(bs[w])
+            wt.loc[i, "total_B_p5"], wt.loc[i, "total_B_p95"] = np.percentile(arr[:, 1], [5, 95])
+            wt.loc[i, "rate_A_p5"], wt.loc[i, "rate_A_p95"] = np.percentile(arr[:, 0], [5, 95])
+        print(wt.round(2).to_string()); wt.round(3).to_csv(f"boj_windows_{tag}.csv", index=False)
         print(ev[pd.to_datetime(ev.date) >= "2024-01-01"][cols].round(2).to_string())

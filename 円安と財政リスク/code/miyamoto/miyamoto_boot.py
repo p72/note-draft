@@ -37,17 +37,35 @@ def estimate(X, ev_dates, p=2):
         if B[k, k] < 0: B[:, k] *= -1
     return res, B, U, idx
 
-def decomp(res, B, U, idx, a, z, M=None, H=400):
+def decomp(res, B, U, idx, a, z, M=None, H=None, X=None):
+    """宮本（2025）と同じ定義の歴史的分解。
+    期首の前日の状態から、窓の中のショックをすべて0として VAR を回した予測（VARトレンド）と、
+    窓の中の構造ショックの寄与（期首を0とした累積）に分ける。X を渡すと、トレンドを直接計算して
+    「実績＝トレンド＋各ショックの寄与」が成り立つことを確認する。"""
     K = B.shape[0]; M = K - 1 if M is None else M; A = res.coefs; p = len(A)
+    wi = np.where((idx >= a) & (idx <= z))[0]; T = len(wi)
+    H = T if H is None else H
     Psi = [np.eye(K)]
     for h in range(1, H + 1): Psi.append(sum(A[j] @ Psi[h - 1 - j] for j in range(min(p, h))))
     Th = np.array([P @ B for P in Psi]); E = np.linalg.solve(B, U.T).T
-    wi = np.where((idx >= a) & (idx <= z))[0]; tot = np.zeros(K)
+    cumTh = Th.cumsum(axis=0)
+    tot = np.zeros(K)
     for j, t in enumerate(wi):
-        h = min(len(wi) - 1 - j, H)       # 打ち切りは H まで（それ以上の応答は0に収束している）
-        tot += Th[:h + 1].sum(axis=0)[K - 1] * E[t]
-    irf = Th.cumsum(axis=0)[:, :, 0]
-    return tot[:M].sum(), tot[M], irf[60, K - 1] / irf[60, 0]
+        h = min(T - 1 - j, H)
+        tot += cumTh[h][K - 1] * E[t]
+    irf = Th.cumsum(axis=0)[:, :, 0] if H >= 60 else None
+    ratio = irf[60, K - 1] / irf[60, 0] if irf is not None else np.nan
+    out = {"rate": tot[:M].sum(), "own": tot[M], "ratio": ratio}
+    if X is not None:
+        # VARトレンド：期首の前の p 日の実績から、ショック0で予測した Δs の累積
+        c = res.params.values[0]; Xv = X.values; pos0 = X.index.get_loc(idx[wi[0]])
+        hist = [Xv[pos0 - 1 - j] for j in range(p)][::-1]
+        trend = 0.0
+        for _ in range(T):
+            y = c + sum(A[j] @ hist[-1 - j] for j in range(p)); hist.append(y); trend += y[K - 1]
+        actual = X.loc[idx[wi[0]]:idx[wi[-1]]].iloc[:, -1].sum()
+        out.update({"trend": trend, "actual": actual, "check": actual - trend - tot.sum()})
+    return out
 
 def run(fx="fred_lead", rates="gsw", speeches=True, start="1995-01-01", end="2023-09-15", a="2021-01-01", z="2023-09-15", unsched=True, p=2, nboot=0):
     lv = load(fx, rates); X = lv.diff().dropna().loc[start:end]
@@ -58,10 +76,12 @@ def run(fx="fred_lead", rates="gsw", speeches=True, start="1995-01-01", end="202
                         + open("speech_dates.txt").read().split())
         ev = ev[~ev.isin(U_)]
     res, B, U, idx = estimate(X, ev, p)
-    rate, own, ratio = decomp(res, B, U, idx, a, z)
+    dd_ = decomp(res, B, U, idx, a, z, X=X); rate, own, ratio = dd_["rate"], dd_["own"], dd_["ratio"]
+    if np.isnan(ratio): ratio = decomp(res, B, U, idx, "1995-01-01", "1995-12-31", H=60)["ratio"]
     w = X.loc[a:z, "s"]; act = w.sum()
     out = {"rates": rates, "speeches": speeches, "events": int(idx.isin([idx[idx >= d][0] for d in ev if idx[0] <= d <= idx[-1]]).sum()), "fx": fx, "start": start, "end": end, "window": f"{a}..{z}", "unsched": unsched, "p": p,
-           "fx_change": act, "rate_shocks": rate, "fx_shock": own, "fx_per_1pp_1y_h60": ratio}
+           "fx_change": act, "var_trend": dd_["trend"], "deviation_from_trend": rate + own,
+           "rate_shocks": rate, "fx_shock": own, "identity_check": dd_["check"], "fx_per_1pp_1y_h60": ratio}
     if nboot:
         # 層別の残差ブートストラップ：FOMC日の残差はFOMC日の間で、それ以外はそれ以外の日の間で引き直す
         # 再推計した係数（A_b, B_b）を実際のデータに当てはめて、実際の歴史の分解を計算する
@@ -83,7 +103,8 @@ def run(fx="fred_lead", rates="gsw", speeches=True, start="1995-01-01", end="202
             # 実際のデータの残差（再推計した係数による）
             cb = rb.params.values[0]; Ab = rb.coefs; Xa = X.values
             Ua = np.array([Xa[t] - cb - sum(Ab[j] @ Xa[t - 1 - j] for j in range(p)) for t in range(p, len(Xa))])
-            r, _, q = decomp(rb, Bb, Ua, X.index[p:], a, z)
+            o = decomp(rb, Bb, Ua, X.index[p:], a, z); r = o["rate"]
+            q = decomp(rb, Bb, Ua, X.index[p:], "1995-01-01", "1995-12-31", H=60)["ratio"]
             draws.append(r); ratios.append(q)
         qd = np.percentile(draws, [5, 16, 50, 84, 95]); qr = np.percentile(ratios, [5, 50, 95])
         out.update({"boot_n": len(draws), "rate_p5": qd[0], "rate_p16": qd[1], "rate_p50": qd[2], "rate_p84": qd[3], "rate_p95": qd[4],

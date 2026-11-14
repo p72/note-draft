@@ -28,6 +28,6 @@ for dd, t in [("2023-09-15", "論文の推計期間の終わり"), ("2025-10-21"
 ax.axhline(0, color="k", lw=.5); ax.set_ylabel("対数ポイント")
 ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.08), ncol=2, fontsize=8, frameon=False)
 ax.set_title("宮本（2025）の構造VARを公表データで再現・延長した要因分解（2021年1月〜2026年11月）")
-fig.text(.01, .005, "出典：FRB（Gürkaynak-Sack-Wright のゼロクーポン金利1〜5年）、FRED（DEXJPUS）、FOMCの公表日、Glick and Leduc (2018) のスピーチ等の日より作成。VARトレンド（定数項）による部分は図示していない", fontsize=8)
+fig.text(.01, .005, "出典：FRB（Gürkaynak-Sack-Wright のゼロクーポン金利1〜5年）、FRED（DEXJPUS）、FOMCの公表日、Glick and Leduc (2018) のスピーチ等の日より作成。VARトレンド（2021年初の状態と定数項による予測）は図示していない", fontsize=8)
 fig.tight_layout(rect=(0, .03, 1, 1)); fig.savefig("01_chart_miyamoto.png", dpi=140)
 print(out.iloc[[0, -1]].round(2)); print(out.loc["2023-09-15":"2023-09-15"].round(2)); print(out.loc["2025-09-30":"2025-09-30"].round(2)); print(out.loc["2026-02-27":"2026-02-27"].round(2))
