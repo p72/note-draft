@@ -4,13 +4,17 @@ from scipy.optimize import minimize
 from statsmodels.tsa.api import VAR
 rng = np.random.default_rng(0)
 
-def load(fx="fred_lead"):
+def load(fx="fred_lead", rates="gsw"):
     raw = pd.read_csv("us_daily_1994.csv", index_col=0, parse_dates=True)
+    if rates == "gsw":   # Gürkaynak-Sack-Wright のゼロクーポン金利（FRB）、1〜5年
+        g = pd.read_csv("gsw_1to5.csv", index_col=0, parse_dates=True)
+        for k in range(1, 6): raw[f"i{k}"] = g[f"SVENY0{k}"].reindex(raw.index)
     if fx == "fred_lead": raw["fx"] = raw.fx.dropna().shift(-1).reindex(raw.index)
     if fx == "yahoo":
         raw["fx"] = pd.read_csv("yahoo_jpy.csv", index_col=0, parse_dates=True).iloc[:, 0].reindex(raw.index)
-    lv = pd.DataFrame({"i1": raw.i1, "i2": raw.i2, "i3": raw.i3, "i5": raw.i5, "s": np.log(raw.fx) * 100}).dropna()
-    return lv
+    cols = ["i1", "i2", "i3", "i4", "i5"] if rates == "gsw" else ["i1", "i2", "i3", "i5"]
+    lv = raw[cols].copy(); lv["s"] = np.log(raw.fx) * 100
+    return lv.dropna()
 
 def estimate(X, ev_dates, p=2):
     K = X.shape[1]; res = VAR(X).fit(p, trend="c")
@@ -33,8 +37,8 @@ def estimate(X, ev_dates, p=2):
         if B[k, k] < 0: B[:, k] *= -1
     return res, B, U, idx
 
-def decomp(res, B, U, idx, a, z, M=4, H=400):
-    K = B.shape[0]; A = res.coefs; p = len(A)
+def decomp(res, B, U, idx, a, z, M=None, H=400):
+    K = B.shape[0]; M = K - 1 if M is None else M; A = res.coefs; p = len(A)
     Psi = [np.eye(K)]
     for h in range(1, H + 1): Psi.append(sum(A[j] @ Psi[h - 1 - j] for j in range(min(p, h))))
     Th = np.array([P @ B for P in Psi]); E = np.linalg.solve(B, U.T).T
@@ -45,16 +49,18 @@ def decomp(res, B, U, idx, a, z, M=4, H=400):
     irf = Th.cumsum(axis=0)[:, :, 0]
     return tot[:M].sum(), tot[M], irf[60, K - 1] / irf[60, 0]
 
-def run(fx="fred_lead", start="1995-01-01", end="2023-09-15", a="2021-01-01", z="2023-09-15", unsched=True, p=2, nboot=0):
-    lv = load(fx); X = lv.diff().dropna().loc[start:end]
+def run(fx="fred_lead", rates="gsw", speeches=True, start="1995-01-01", end="2023-09-15", a="2021-01-01", z="2023-09-15", unsched=True, p=2, nboot=0):
+    lv = load(fx, rates); X = lv.diff().dropna().loc[start:end]
     ev = pd.to_datetime(open("fomc_dates.txt").read().split())
+    if speeches: ev = ev.append(pd.to_datetime(open("speech_dates.txt").read().split())).sort_values()
     if not unsched:
-        U_ = pd.to_datetime(["1998-10-15", "2001-01-03", "2001-04-18", "2001-09-17", "2008-01-22", "2008-10-08", "2020-03-03", "2020-03-15"])
+        U_ = pd.to_datetime(["1998-10-15", "2001-01-03", "2001-04-18", "2001-09-17", "2008-01-22", "2008-10-08", "2020-03-03", "2020-03-15"]
+                        + open("speech_dates.txt").read().split())
         ev = ev[~ev.isin(U_)]
     res, B, U, idx = estimate(X, ev, p)
     rate, own, ratio = decomp(res, B, U, idx, a, z)
     w = X.loc[a:z, "s"]; act = w.sum()
-    out = {"fx": fx, "start": start, "end": end, "window": f"{a}..{z}", "unsched": unsched, "p": p,
+    out = {"rates": rates, "speeches": speeches, "events": int(idx.isin([idx[idx >= d][0] for d in ev if idx[0] <= d <= idx[-1]]).sum()), "fx": fx, "start": start, "end": end, "window": f"{a}..{z}", "unsched": unsched, "p": p,
            "fx_change": act, "rate_shocks": rate, "fx_shock": own, "fx_per_1pp_1y_h60": ratio}
     if nboot:
         # 層別の残差ブートストラップ：FOMC日の残差はFOMC日の間で、それ以外はそれ以外の日の間で引き直す
@@ -87,7 +93,7 @@ def run(fx="fred_lead", start="1995-01-01", end="2023-09-15", a="2021-01-01", z=
 if __name__ == "__main__":
     rows = []
     nb = int(sys.argv[1]) if len(sys.argv) > 1 else 0
-    specs = [dict(nboot=nb), dict(start="1996-11-01"), dict(unsched=False), dict(p=1), dict(p=5),
-             dict(fx="yahoo", start="1996-11-01"), dict(fx="fred")]
+    specs = [dict(nboot=nb), dict(speeches=False), dict(rates="fred"), dict(start="1996-11-01"), dict(unsched=False),
+             dict(p=1), dict(p=5), dict(fx="yahoo", start="1996-11-01"), dict(fx="fred")]
     for s in specs: rows.append(run(**s)); print({k: (round(v, 2) if isinstance(v, float) else v) for k, v in rows[-1].items()})
     pd.DataFrame(rows).round(3).to_csv("miyamoto_sensitivity.csv", index=False)
