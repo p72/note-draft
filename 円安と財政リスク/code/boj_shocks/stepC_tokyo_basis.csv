@@ -1,0 +1,4 @@
+window,days,raw_fx,us_rate_predicted,abnormal_total,boj_days,abnormal_boj_days,fiscal_event_days,abnormal_fiscal_days,abnormal_other_days
+2025-10-01..2026-02-27,99,5.275,1.091,4.184,3,0.697,12,1.271,2.215
+2026-03-01..2026-11-05,167,1.336,8.568,-7.231,6,-0.532,5,-2.176,-4.523
+2025-10-01..2026-11-05,266,6.611,9.659,-3.048,9,0.165,17,-0.904,-2.308
