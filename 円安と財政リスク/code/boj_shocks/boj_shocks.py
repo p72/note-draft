@@ -35,7 +35,8 @@ us = pd.read_csv("gsw_us_1_2_10_30.csv", index_col=0, parse_dates=True)
 # 東京の営業日（9時・17時のドル円と日本国債がそろう日）
 d = fx.join(jp, how="inner").dropna()
 # 米国の金利：その日のニューヨーク終値（論文と同じく日次終値の前日差。米国の休日は直近の値）
-d = d.join(us.reindex(d.index, method="ffill"))
+# 米国だけが休みの日はファイルに空欄の行があるため、空欄を除いてから直近の値を対応させる
+d = d.join(us.dropna().reindex(d.index, method="ffill"))
 d["s"] = np.log(d.fx17) * 100
 d["ds917"] = (np.log(d.fx17) - np.log(d.fx09)) * 100
 M = ["1", "2", "10", "30"]
