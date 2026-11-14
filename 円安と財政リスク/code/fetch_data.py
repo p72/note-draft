@@ -13,7 +13,7 @@ y.to_csv("jgb_daily.csv")
 "fred-data": """
 from scripts.fred_data import get_fred, get_fred_multi, get_yahoo
 import pandas as pd
-d = {k: get_fred(i, start="2022-01-01") for k, i in {"us2": "DGS2", "us10": "DGS10"}.items()}
+d = {k: get_fred(i, start="2022-01-01") for k, i in {"us2": "DGS2", "us10": "DGS10", "us30": "DGS30"}.items()}
 d["usdjpy"] = get_yahoo("JPY=X", start="2022-01-01")
 pd.DataFrame(d).to_csv("daily_us_fx.csv")
 m, _ = get_fred_multi({"fx": "EXJPUS", "us2": "DGS2", "brent": "DCOILBRENTEU"}, start="2014-01-01", frequency="m", aggregation_method="avg")
@@ -22,10 +22,15 @@ m.join(c).to_csv("monthly_us.csv")
 """,
 "boj-api": """
 from scripts.boj_api import get_series
-codes = {"IP": "BPBP6JYNSN906", "ICT": "BPBP6JYNSN907", "OBS": "BPBP6JYNSN908",
-         "FDI": "BPBP6JYNFB1", "FDI_reinv_A": "BPBP6JYNFA132", "TB": "BPBP6JYNTB", "EQ_A": "BPBP6JYNFA21"}
+# デジタル関連収支は日本銀行の定義（著作権等使用料＋通信・コンピュータ・情報サービス＋専門・経営コンサルティングサービス）
+codes = {"COPY": "BPBP6JYNSN9062", "ICT": "BPBP6JYNSN907", "CONS": "BPBP6JYNSN9082",
+         "FDI": "BPBP6JYNFB1", "FDI_reinv_A": "BPBP6JYNFA132", "FDI_reinv_L": "BPBP6JYNFL132",
+         "TB": "BPBP6JYNTB", "EQ_A": "BPBP6JYNFA21"}
 df = get_series("BP01", list(codes.values()), start_date="201401"); df.columns = list(codes)
 df.to_csv("bop.csv")
+# 東京市場ドル・円スポット17時時点（日次）：国債の東京終値と時点をそろえるため
+fx = get_series("FM08", "FXERD04", start_date="202201", dropna=True); fx.columns = ["usdjpy_tokyo17"]
+fx.to_csv("usdjpy_tokyo17.csv")
 """,
 "estat-api": """
 from scripts.estat_api import get_stats_df
