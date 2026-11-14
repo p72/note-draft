@@ -1,5 +1,5 @@
 """推計：週次の金利差モデル（図1・表1）、月次の要因分解モデル（図2・図3・表2〜表4）、
-財政ニュースのイベントスタディと日次の符号分類（図4・表5・表6）。
+財政ニュースのイベントスタディと日次の記述的な分類（図4・表5・表6）。
 
 単位：ドル円は対数×100。差をとった値は「対数ポイント」（ふつうの変化率とは少しずれる）。
 """
@@ -114,20 +114,31 @@ x["fit"] = (sm.add_constant(x[C]) @ m.params); x.to_csv("monthly.csv")
 # C. 財政ニュースのイベントスタディ（日次、東京市場の時点にそろえる）
 # =============================================================
 fx = pd.read_csv("usdjpy_tokyo17.csv", index_col=0, parse_dates=True).usdjpy_tokyo17
-us = pd.read_csv("daily_us_fx.csv", index_col=0, parse_dates=True)[["us2", "us10", "us30"]]
-d = pd.DataFrame({"fx": np.log(fx) * 100}).join(j, how="inner")       # 東京17時の為替と国債の東京終値
-d = d.join(us.reindex(d.index, method="ffill").shift(1))             # 前日のニューヨーク終値（東京の当日より前に確定）
-d = d.dropna()
-dd = d.diff().dropna()
-dd["us2"] = d.us2.diff().reindex(dd.index); dd["us10"] = d.us10.diff().reindex(dd.index)
-est = dd.loc["2023-01-01":"2025-09-30"]
+us = pd.read_csv("daily_us_fx.csv", index_col=0, parse_dates=True)[["us2", "us10"]]
+# 東京の営業日（東京17時の為替と国債の東京終値がそろう日）をカレンダーとして固定する
+base = pd.DataFrame({"fx": np.log(fx) * 100}).join(j[["jp2", "jp10", "jp30"]], how="inner").dropna()
+# 各東京日の前日（暦日）までに確定した最新のニューヨーク終値を対応させる（米国の休場日は有効な直近値）
+valid_us = us.dropna()
+prev = valid_us.reindex(base.index - pd.Timedelta(days=1), method="ffill"); prev.index = base.index
+d = base.join(prev)
+dd = d.diff().iloc[1:]                                          # 東京営業日どうしの差（行を落とさない）
+est = dd.loc["2023-01-01":"2025-09-30"].dropna()
 mk = ols(est.fx, est[["us2", "us10"]], 5); tabs_ev = [coef_table(mk, "日次_米金利による為替の期待変化_2023.1-2025.9")]
 dd["ab"] = dd.fx - sm.add_constant(dd[["us2", "us10"]]) @ mk.params        # 異常変化（米金利で説明できない円の動き）
-dd.to_csv("daily.csv")
-ab2 = dd.ab.rolling(2).sum()                                               # 2営業日の累積
-sd2 = ab2.loc["2023-01-01":"2025-09-30"].std()
 
-# 事前に定めたイベント：最初に市場が反応できる東京の営業日を0日目とし、0〜1日目の2営業日で測る
+# 為替介入日。2営業日の窓（前営業日の東京17時→1日目の東京17時）にこれらの日が入れば介入と重なるとみなす
+INTERV = pd.to_datetime(["2024-04-29", "2024-05-01", "2024-07-11", "2024-07-12",
+                         "2026-07-30", "2026-07-31", "2026-08-03"])
+idx = dd.index
+start = pd.Series(d.index[:-1], index=idx)                       # 各リターンの始点（前の東京営業日）
+def window_hits(i0, i1):
+    lo, hi = start.iloc[i0], idx[i1]
+    return bool(((INTERV > lo) & (INTERV <= hi)).any())
+ab2 = dd.ab.rolling(2).sum(); j302 = dd.jp30.rolling(2).sum() * 100
+hit2 = pd.Series([window_hits(i - 1, i) if i >= 1 else True for i in range(len(idx))], index=idx)
+sd2 = ab2[~hit2].loc["2023-01-01":"2025-09-30"].std(); sd30 = j302[~hit2].loc["2023-01-01":"2025-09-30"].std()
+
+# 事前に定めたイベント：最初に市場が反応できる東京の営業日を0日目とし、0〜1日目の2東京営業日で測る
 EV = [
     ("2025-10-06", "拡張", "自民党総裁選で高市氏が勝利（10月4日・土）"),
     ("2025-11-07", "拡張", "単年度PB目標の取り下げを国会で答弁"),
@@ -139,54 +150,60 @@ EV = [
     ("2026-08-05", "拡張", "政府が食料品消費税1%の方針を決定"),
     ("2026-10-19", "拡張", "財源について「国債発行を否定するものではない」と答弁"),
 ]
-# 為替介入日（2024年4・5・7月、2026年7月30日・31日、8月3日）を含む窓は、介入の影響と区別できないため集計から除く
-INTERV = pd.to_datetime(["2024-04-29", "2024-05-01", "2024-07-11", "2024-07-12",
-                         "2026-07-30", "2026-07-31", "2026-08-03"])
 rows = []
 for day, kind, label in EV:
-    t0 = dd.index[dd.index >= day][0]; i = dd.index.get_loc(t0); win = dd.iloc[i:i + 2]
-    rows.append({"date": t0.date(), "kind": kind, "event": label,
-                 "intervention": bool(win.index.isin(INTERV).any()),
-                 "fx_raw": win.fx.sum(), "fx_abnormal": win.ab.sum(), "z": win.ab.sum() / sd2,
-                 "jp30": win.jp30.sum() * 100, "jp10": win.jp10.sum() * 100, "jp2": win.jp2.sum() * 100,
+    i0 = idx.get_indexer([idx[idx >= day][0]])[0]; win = dd.iloc[i0:i0 + 2]
+    ok = len(win) == 2 and win[["ab", "jp30"]].notna().all().all()
+    rows.append({"date": idx[i0].date(), "day1": idx[i0 + 1].date(), "kind": kind, "event": label,
+                 "intervention": window_hits(i0, i0 + 1),
+                 "fx_raw": win.fx.sum() if ok else np.nan, "fx_abnormal": win.ab.sum() if ok else np.nan,
+                 "z": win.ab.sum() / sd2 if ok else np.nan,
+                 "jp30": win.jp30.sum() * 100, "jp30_z": win.jp30.sum() * 100 / sd30,
+                 "jp10": win.jp10.sum() * 100, "jp2": win.jp2.sum() * 100,
                  "us2_prevNY": win.us2.sum() * 100})
 ev = pd.DataFrame(rows).round(2); ev.to_csv("events.csv", index=False)
-# 拡張ニュースの平均と、ランダムな日付との比較（並べ替え）
+
+# ランダムな日付との比較（プラセボ）：介入と重なる窓を除いた2営業日窓から k 件を選ぶ操作を2万回
 exp = ev[(ev.kind == "拡張") & (~ev.intervention)]; k = len(exp)
-bad = ab2.index.isin(INTERV) | ab2.index.isin(INTERV + pd.offsets.BDay(1))
-pool = ab2[~bad].loc["2023-01-01":"2026-11-30"].dropna().values
 rng = np.random.default_rng(0)
-sims = np.array([rng.choice(pool, k, replace=False).mean() for _ in range(20000)])
-summ = {"拡張ニュースの数（介入を除く）": k, "拡張_異常変化の平均": exp.fx_abnormal.mean(),
-        "拡張_30年金利の平均変化bp": exp.jp30.mean(),
-        "並べ替えp値（片側、円安方向）": (sims >= exp.fx_abnormal.mean()).mean(),
-        "拡張_30年金利の並べ替えp値（片側、上昇方向）": np.nan,
-        "拡張_異常変化の合計": exp.fx_abnormal.sum(),
+def placebo(series, a, z, stat):
+    pool = series[~hit2].loc[a:z].dropna().values
+    sims = np.array([rng.choice(pool, k, replace=False).mean() for _ in range(20000)])
+    return (sims >= stat).mean()
+summ = {"拡張ニュースの数（介入を除く）": k,
+        "拡張_異常変化の平均": exp.fx_abnormal.mean(), "拡張_30年金利の平均変化bp": exp.jp30.mean(),
+        "p_円_参照2023.1-2026.11": placebo(ab2, "2023-01-01", "2026-11-30", exp.fx_abnormal.mean()),
+        "p_30年_参照2023.1-2026.11": placebo(j302, "2023-01-01", "2026-11-30", exp.jp30.mean()),
+        "p_円_参照2025.7-2026.11": placebo(ab2, "2025-07-01", "2026-11-30", exp.fx_abnormal.mean()),
+        "p_30年_参照2025.7-2026.11": placebo(j302, "2025-07-01", "2026-11-30", exp.jp30.mean()),
         "規律_異常変化の平均": ev[ev.kind == "規律"].fx_abnormal.mean(),
-        "2営業日異常変化の標準偏差（2023.1-2025.9）": sd2}
-j30 = d.jp30.diff().rolling(2).sum() * 100
-j30 = j30[~(j30.index.isin(INTERV) | j30.index.isin(INTERV + pd.offsets.BDay(1)))].loc["2023-01-01":"2026-11-30"].dropna().values
-sims30 = np.array([rng.choice(j30, k, replace=False).mean() for _ in range(20000)])
-summ["拡張_30年金利の並べ替えp値（片側、上昇方向）"] = (sims30 >= exp.jp30.mean()).mean()
-summ["2営業日30年金利変化の標準偏差bp"] = j30.std()
-# 1月の解散・減税報道の前後（1月9日〜23日）の累積
-summ["2026.1.9-1.23_異常変化の累積"] = dd.loc["2026-01-09":"2026-01-23"].ab.sum()
-summ["2026.1.9-1.23_30年金利の累積変化bp"] = dd.loc["2026-01-09":"2026-01-23"].jp30.sum() * 100
+        "2営業日異常変化の標準偏差（2023.1-2025.9）": sd2, "2営業日30年金利変化の標準偏差bp": sd30,
+        "推計期間の日数": len(est),
+        "2026.1.9-1.23_異常変化の累積": dd.loc["2026-01-09":"2026-01-23"].ab.sum(),
+        "2026.1.9-1.23_30年金利の累積変化bp": dd.loc["2026-01-09":"2026-01-23"].jp30.sum() * 100}
+# 総裁選翌日（10月6日）を除いた5件（日銀の見通しの変化と重なるため）
+ex = exp[exp.date.astype(str) != "2025-10-06"]
+def placebo_k(series, a, z, stat, kk):
+    pool = series[~hit2].loc[a:z].dropna().values
+    sims = np.array([rng.choice(pool, kk, replace=False).mean() for _ in range(20000)])
+    return (sims >= stat).mean()
+summ["10月6日を除く5件_異常変化の平均"] = ex.fx_abnormal.mean()
+summ["10月6日を除く5件_p_円"] = placebo_k(ab2, "2023-01-01", "2026-11-30", ex.fx_abnormal.mean(), len(ex))
+summ["10月6日を除く5件_30年金利の平均bp"] = ex.jp30.mean()
+summ["10月6日を除く5件_p_30年"] = placebo_k(j302, "2023-01-01", "2026-11-30", ex.jp30.mean(), len(ex))
 pd.Series(summ).round(3).to_csv("events_summary.csv", header=["value"])
 
-# 日次の符号分類（Jarociński and Karadi 2020 の符号制約の考え方を応用）：
-#  異常変化（円安＝プラス）と30年金利の変化が同符号 → 「財政型」（金利上昇と円安が同時）
-#  異符号 → 「金融型」（金利上昇で円高。通常の金利差の関係）
-dd["type"] = np.where(np.sign(dd.ab) == np.sign(dd.jp30), "財政型", "金融型")
-dd.loc[(dd.ab == 0) | (dd.jp30 == 0), "type"] = "その他"
+# 日次の記述的な分類：30年金利の変化と異常変化の符号が同じ日・逆の日・どちらかが0の日
+dd["type"] = np.where(np.sign(dd.ab) == np.sign(dd.jp30), "同符号", "逆符号")
+dd.loc[(dd.ab == 0) | (dd.jp30 == 0) | dd.ab.isna(), "type"] = "その他"
 rows = []
 for nm, (a, z) in {"2023.1-2025.9": ("2023-01-01", "2025-09-30"),
                    "2025.10-2026.2": ("2025-10-01", "2026-02-27"),
                    "2026.3-2026.11": ("2026-03-01", "2026-11-30")}.items():
-    s = dd.loc[a:z]
-    r = {"period": nm, "days": len(s), "fx_total": s.fx.sum(), "ab_total": s.ab.sum()}
-    for t in ["財政型", "金融型"]:
-        ss = s[s.type == t]; r[f"{t}_days"] = len(ss); r[f"{t}_ab"] = ss.ab.sum(); r[f"{t}_ab_per_day"] = ss.ab.mean()
+    s_ = dd.loc[a:z]
+    r = {"period": nm, "days": len(s_), "ab_total": s_.ab.sum()}
+    for t in ["同符号", "逆符号", "その他"]:
+        ss = s_[s_.type == t]; r[f"{t}_days"] = len(ss); r[f"{t}_ab"] = ss.ab.sum(); r[f"{t}_ab_per_day"] = ss.ab.mean()
     rows.append(r)
 pd.DataFrame(rows).round(2).to_csv("signclass.csv", index=False)
 dd.to_csv("daily.csv")
@@ -198,6 +215,9 @@ if __name__ == "__main__":
     print(pd.read_csv("unitroot.csv").to_string())
     print(dec.to_string())
     print(ev.to_string()); print(pd.Series(summ).round(3)); print(pd.read_csv("signclass.csv").to_string())
+    c = dd.loc["2025-07-01":].ab.cumsum()
+    print("Oct", round(dd.loc["2025-10"].ab.sum(), 2), "Jul-Sep", round(dd.loc["2025-07":"2025-09"].ab.sum(), 2),
+          "Jan5", round(c.loc["2026-01-05"], 2), "Feb27", round(c.loc["2026-02-27"], 2), "Oct-Feb", round(dd.loc["2025-10-01":"2026-02-27"].ab.sum(), 2))
     print(x.loc[["2021-12-01", "2025-09-01", "2026-02-01", "2026-09-01"], ["fx", "rsp2", "slope", "dig", "fdi", "brent"]].round(2))
     print("gap", w.gap.loc["2025-04"].mean(), w.gap.loc["2025-09"].mean(), w.gap.max(), w.gap.idxmax(), w.gap.iloc[-1], w.index[-1],
           np.exp(w.fit.iloc[-1] / 100), w.usdjpy.iloc[-1], (np.exp(w.gap.iloc[-1] / 100) - 1) * 100)
