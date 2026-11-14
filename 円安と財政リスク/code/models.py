@@ -76,6 +76,9 @@ C2 = C + ["tb", "eq"]; m2 = lvl(C2); tabs.append(coef_table(m2, "月次水準_�
 tabs.append(coef_table(d12(C2), "月次前年差_貿易収支・対外株式追加"))
 C3 = ["sp2", "slope", "dig", "fdi", "oil"]; m3 = lvl(C3); tabs.append(coef_table(m3, "月次水準_名目2年金利差"))
 m4 = lvl(C, a="2017-01"); tabs.append(coef_table(m4, "月次水準_2017.1-2026.9"))
+x["trend"] = np.arange(len(x)) / 12.0                      # 時間トレンド（年）
+tabs.append(coef_table(lvl(C + ["trend"]), "月次水準_時間トレンド追加"))
+m5 = lvl(C, a="2022-01")                                   # 2022年以降の係数（分解の感度用）
 pd.concat(tabs).round(4).to_csv("regression_results.csv")
 
 # 単位根・共和分（Engle-Granger：水準回帰の残差のADF。臨界値は通常のADFより厳しい）
@@ -107,6 +110,7 @@ rows += [decomp(m2, C2, a, z, "貿易収支・対外株式追加") for a, z in P
 rows += [decomp(m3, C3, a, z, "名目2年金利差") for a, z in P]
 rows += [decomp(m4, C, a, z, "推計2017年から") for a, z in P]
 rows += [decomp(md, C, a, z, "前年差モデルの係数") for a, z in P]
+rows += [decomp(m5, C, a, z, "2022年以降の係数") for a, z in P]
 dec = pd.DataFrame(rows).round(1); dec.to_csv("decomposition.csv", index=False)
 x["fit"] = (sm.add_constant(x[C]) @ m.params); x.to_csv("monthly.csv")
 
@@ -120,11 +124,17 @@ base = pd.DataFrame({"fx": np.log(fx) * 100}).join(j[["jp2", "jp10", "jp30"]], h
 # 各東京日の前日（暦日）までに確定した最新のニューヨーク終値を対応させる（米国の休場日は有効な直近値）
 valid_us = us.dropna()
 prev = valid_us.reindex(base.index - pd.Timedelta(days=1), method="ffill"); prev.index = base.index
-d = base.join(prev)
+us30 = pd.read_csv("daily_us_fx.csv", index_col=0, parse_dates=True)["us30"].dropna()
+p30 = us30.reindex(base.index - pd.Timedelta(days=1), method="ffill"); p30.index = base.index
+d = base.join(prev).join(p30.rename("us30"))
 dd = d.diff().iloc[1:]                                          # 東京営業日どうしの差（行を落とさない）
 est = dd.loc["2023-01-01":"2025-09-30"].dropna()
 mk = ols(est.fx, est[["us2", "us10"]], 5); tabs_ev = [coef_table(mk, "日次_米金利による為替の期待変化_2023.1-2025.9")]
 dd["ab"] = dd.fx - sm.add_constant(dd[["us2", "us10"]]) @ mk.params        # 異常変化（米金利で説明できない円の動き）
+# 国債30年金利も、前日の米30年金利の変化で説明できる分を除いた「異常変化」を作る（bp）
+est30 = dd.loc["2023-01-01":"2025-09-30", ["jp30", "us30"]].dropna() * 100
+m30 = ols(est30.jp30, est30[["us30"]], 5); tabs_ev.append(coef_table(m30, "日次_米30年金利による国債30年の期待変化_2023.1-2025.9"))
+dd["ab30"] = dd.jp30 * 100 - sm.add_constant(dd[["us30"]] * 100) @ m30.params
 
 # 為替介入日。2営業日の窓（前営業日の東京17時→1日目の東京17時）にこれらの日が入れば介入と重なるとみなす
 INTERV = pd.to_datetime(["2024-04-29", "2024-05-01", "2024-07-11", "2024-07-12",
@@ -134,7 +144,7 @@ start = pd.Series(d.index[:-1], index=idx)                       # 各リター�
 def window_hits(i0, i1):
     lo, hi = start.iloc[i0], idx[i1]
     return bool(((INTERV > lo) & (INTERV <= hi)).any())
-ab2 = dd.ab.rolling(2).sum(); j302 = dd.jp30.rolling(2).sum() * 100
+ab2 = dd.ab.rolling(2).sum(); j302 = dd.jp30.rolling(2).sum() * 100; a302 = dd.ab30.rolling(2).sum()
 hit2 = pd.Series([window_hits(i - 1, i) if i >= 1 else True for i in range(len(idx))], index=idx)
 sd2 = ab2[~hit2].loc["2023-01-01":"2025-09-30"].std(); sd30 = j302[~hit2].loc["2023-01-01":"2025-09-30"].std()
 
@@ -159,6 +169,7 @@ for day, kind, label in EV:
                  "fx_raw": win.fx.sum() if ok else np.nan, "fx_abnormal": win.ab.sum() if ok else np.nan,
                  "z": win.ab.sum() / sd2 if ok else np.nan,
                  "jp30": win.jp30.sum() * 100, "jp30_z": win.jp30.sum() * 100 / sd30,
+                 "jp30_abnormal": win.ab30.sum(), "us30_prevNY": win.us30.sum() * 100,
                  "jp10": win.jp10.sum() * 100, "jp2": win.jp2.sum() * 100,
                  "us2_prevNY": win.us2.sum() * 100})
 ev = pd.DataFrame(rows).round(2); ev.to_csv("events.csv", index=False)
@@ -191,6 +202,13 @@ summ["10月6日を除く5件_異常変化の平均"] = ex.fx_abnormal.mean()
 summ["10月6日を除く5件_p_円"] = placebo_k(ab2, "2023-01-01", "2026-11-30", ex.fx_abnormal.mean(), len(ex))
 summ["10月6日を除く5件_30年金利の平均bp"] = ex.jp30.mean()
 summ["10月6日を除く5件_p_30年"] = placebo_k(j302, "2023-01-01", "2026-11-30", ex.jp30.mean(), len(ex))
+ex1 = exp[exp.date.astype(str) != "2026-01-19"]
+summ["1月19日を除く5件_30年金利の平均bp"] = ex1.jp30.mean()
+summ["1月19日を除く5件_p_30年"] = placebo_k(j302, "2023-01-01", "2026-11-30", ex1.jp30.mean(), len(ex1))
+summ["1月19日を除く5件_異常変化の平均"] = ex1.fx_abnormal.mean()
+summ["拡張_30年金利の異常変化の平均bp"] = exp.jp30_abnormal.mean()
+summ["p_30年異常_参照2023.1-2026.11"] = placebo_k(a302, "2023-01-01", "2026-11-30", exp.jp30_abnormal.mean(), k)
+summ["1月19日を除く5件_30年金利の異常変化の平均bp"] = ex1.jp30_abnormal.mean()
 pd.Series(summ).round(3).to_csv("events_summary.csv", header=["value"])
 
 # 査読後に追加で確認したイベント（事前に決めた9件とは分けて扱う）：「骨太ショック」
@@ -203,7 +221,9 @@ rows = []
 for label, a, z in POST:
     w_ = dd.loc[a:z]
     rows.append({"window": label, "start": a, "end": z, "days": len(w_), "fx_raw": w_.fx.sum(),
-                 "fx_abnormal": w_.ab.sum(), "z_2day_sd": w_.ab.sum() / sd2,
+                 "fx_abnormal": w_.ab.sum(), "z_2day_sd": w_.ab.sum() / sd2 if len(w_) == 2 else np.nan,
+                 "fx_predicted": (w_.fx - w_.ab).sum(), "const_part": mk.params["const"] * len(w_),
+                 "jp30_abnormal": w_.ab30.sum(),
                  "jp30": w_.jp30.sum() * 100, "jp10": w_.jp10.sum() * 100, "jp2": w_.jp2.sum() * 100})
 pd.DataFrame(rows).round(2).to_csv("events_posthoc.csv", index=False)
 
