@@ -193,6 +193,20 @@ summ["10月6日を除く5件_30年金利の平均bp"] = ex.jp30.mean()
 summ["10月6日を除く5件_p_30年"] = placebo_k(j302, "2023-01-01", "2026-11-30", ex.jp30.mean(), len(ex))
 pd.Series(summ).round(3).to_csv("events_summary.csv", header=["value"])
 
+# 査読後に追加で確認したイベント（事前に決めた9件とは分けて扱う）：「骨太ショック」
+POST = [("骨太の方針2026の原案発表（6月30日）", "2026-06-30", "2026-07-01"),
+        ("原案発表の翌日から（7月1日〜2日）", "2026-07-01", "2026-07-02"),
+        ("骨太ショックの期間（6月30日〜7月9日）", "2026-06-30", "2026-07-09"),
+        ("片山財務相の発言（7月10日〜13日）", "2026-07-10", "2026-07-13"),
+        ("骨太の方針2026の閣議決定（7月21日〜22日）", "2026-07-21", "2026-07-22")]
+rows = []
+for label, a, z in POST:
+    w_ = dd.loc[a:z]
+    rows.append({"window": label, "start": a, "end": z, "days": len(w_), "fx_raw": w_.fx.sum(),
+                 "fx_abnormal": w_.ab.sum(), "z_2day_sd": w_.ab.sum() / sd2,
+                 "jp30": w_.jp30.sum() * 100, "jp10": w_.jp10.sum() * 100, "jp2": w_.jp2.sum() * 100})
+pd.DataFrame(rows).round(2).to_csv("events_posthoc.csv", index=False)
+
 # 日次の記述的な分類：30年金利の変化と異常変化の符号が同じ日・逆の日・どちらかが0の日
 dd["type"] = np.where(np.sign(dd.ab) == np.sign(dd.jp30), "同符号", "逆符号")
 dd.loc[(dd.ab == 0) | (dd.jp30 == 0) | dd.ab.isna(), "type"] = "その他"

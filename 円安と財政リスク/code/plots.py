@@ -62,6 +62,8 @@ a2 = ax.twinx(); a2.plot(dd.index, dd.jp30.cumsum() * 100, color="tab:green", la
 for _, e in ev.iterrows():
     c = "tab:orange" if e.kind == "拡張" else "tab:blue"; ls = ":" if e.intervention else "--"
     ax.axvline(e.date, color=c, ls=ls, lw=1)
+ax.axvspan(pd.Timestamp("2026-06-30"), pd.Timestamp("2026-07-09"), color="tab:orange", alpha=.12)
+ax.text(pd.Timestamp("2026-06-08"), ax.get_ylim()[1] - .6, "骨太ショック", fontsize=9)
 for dday in pd.to_datetime(["2026-07-30", "2026-07-31", "2026-08-03"]):
     ax.axvspan(dday, dday + pd.Timedelta(days=1), color="gray", alpha=.3)
 ax.axvline(pd.Timestamp("2026-02-27"), color="k", lw=.6); ax.text(pd.Timestamp("2026-03-03"), ax.get_ylim()[0] + .3, "イラン戦争", fontsize=9)
