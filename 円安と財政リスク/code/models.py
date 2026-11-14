@@ -1,5 +1,5 @@
 """推計：週次の金利差モデル（図1・表1）、月次の要因分解モデル（図2・図3・表2〜表4）、
-財政ニュースのイベントスタディと日次の記述的な分類（図4・表5・表6）。
+財政ニュースのイベントスタディ（図4・表3・表4）。
 
 単位：ドル円は対数×100。差をとった値は「対数ポイント」（ふつうの変化率とは少しずれる）。
 """
@@ -227,19 +227,6 @@ for label, a, z in POST:
                  "jp30": w_.jp30.sum() * 100, "jp10": w_.jp10.sum() * 100, "jp2": w_.jp2.sum() * 100})
 pd.DataFrame(rows).round(2).to_csv("events_posthoc.csv", index=False)
 
-# 日次の記述的な分類：30年金利の変化と異常変化の符号が同じ日・逆の日・どちらかが0の日
-dd["type"] = np.where(np.sign(dd.ab) == np.sign(dd.jp30), "同符号", "逆符号")
-dd.loc[(dd.ab == 0) | (dd.jp30 == 0) | dd.ab.isna(), "type"] = "その他"
-rows = []
-for nm, (a, z) in {"2023.1-2025.9": ("2023-01-01", "2025-09-30"),
-                   "2025.10-2026.2": ("2025-10-01", "2026-02-27"),
-                   "2026.3-2026.11": ("2026-03-01", "2026-11-30")}.items():
-    s_ = dd.loc[a:z]
-    r = {"period": nm, "days": len(s_), "ab_total": s_.ab.sum()}
-    for t in ["同符号", "逆符号", "その他"]:
-        ss = s_[s_.type == t]; r[f"{t}_days"] = len(ss); r[f"{t}_ab"] = ss.ab.sum(); r[f"{t}_ab_per_day"] = ss.ab.mean()
-    rows.append(r)
-pd.DataFrame(rows).round(2).to_csv("signclass.csv", index=False)
 dd.to_csv("daily.csv")
 pd.concat(tabs + tabs_ev).round(4).to_csv("regression_results.csv")
 
@@ -248,7 +235,7 @@ if __name__ == "__main__":
     print(pd.concat(tabs + tabs_ev).round(3).to_string())
     print(pd.read_csv("unitroot.csv").to_string())
     print(dec.to_string())
-    print(ev.to_string()); print(pd.Series(summ).round(3)); print(pd.read_csv("signclass.csv").to_string())
+    print(ev.to_string()); print(pd.Series(summ).round(3)); 
     c = dd.loc["2025-07-01":].ab.cumsum()
     print("Oct", round(dd.loc["2025-10"].ab.sum(), 2), "Jul-Sep", round(dd.loc["2025-07":"2025-09"].ab.sum(), 2),
           "Jan5", round(c.loc["2026-01-05"], 2), "Feb27", round(c.loc["2026-02-27"], 2), "Oct-Feb", round(dd.loc["2025-10-01":"2026-02-27"].ab.sum(), 2))
