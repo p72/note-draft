@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="580" viewBox="0 0 340 245">
+<rect width="340" height="245" fill="white"/>
+<line x1="46" y1="18" x2="46" y2="210" stroke="#303030" stroke-width="1.5"/><line x1="46" y1="210" x2="325" y2="210" stroke="#303030" stroke-width="1.5"/>
+<text x="8" y="15" font-size="10" fill="#303030">限界便益・費用</text><text x="231" y="235" font-size="10" fill="#303030">救命行為の実施量</text>
+<line x1="55" y1="184" x2="290" y2="42" stroke="#DF7846" stroke-width="2.5"/>
+<line x1="55" y1="33" x2="300" y2="168" stroke="#229B72" stroke-width="2.5"/>
+<line x1="55" y1="92" x2="300" y2="227" stroke="#478AD0" stroke-width="2.5"/>
+<line x1="167" y1="210" x2="167" y2="150" stroke="#478AD0" stroke-dasharray="4 4"/>
+<line x1="211" y1="210" x2="211" y2="90" stroke="#229B72" stroke-dasharray="4 4"/>
+<circle cx="167" cy="154" r="4" fill="#478AD0"/><circle cx="211" cy="90" r="4" fill="#229B72"/>
+<text x="170" y="227" font-size="11" text-anchor="middle" fill="#478AD0">Qp</text><text x="215" y="227" font-size="11" text-anchor="middle" fill="#229B72">Qs</text>
+<text x="220" y="43" font-size="10" fill="#DF7846">限界私的費用 MPC</text>
+<text x="217" y="110" font-size="10" fill="#229B72">限界社会便益 MSB</text>
+<text x="252" y="187" font-size="10" fill="#478AD0">MPB</text>
+<path d="M167 154 L167 111 L211 90" fill="none" stroke="#B188DC" stroke-dasharray="3 3" stroke-width="1.6"/>
+<text x="85" y="116" font-size="10" fill="#B188DC">過少供給</text></svg>
