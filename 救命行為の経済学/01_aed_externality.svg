@@ -1,16 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="580" viewBox="0 0 340 245">
-<rect width="340" height="245" fill="white"/>
-<line x1="46" y1="18" x2="46" y2="210" stroke="#303030" stroke-width="1.5"/><line x1="46" y1="210" x2="325" y2="210" stroke="#303030" stroke-width="1.5"/>
-<text x="8" y="15" font-size="10" fill="#303030">限界便益・費用</text><text x="231" y="235" font-size="10" fill="#303030">救命行為の実施量</text>
-<line x1="55" y1="184" x2="290" y2="42" stroke="#DF7846" stroke-width="2.5"/>
-<line x1="55" y1="33" x2="300" y2="168" stroke="#229B72" stroke-width="2.5"/>
-<line x1="55" y1="92" x2="300" y2="227" stroke="#478AD0" stroke-width="2.5"/>
-<line x1="167" y1="210" x2="167" y2="150" stroke="#478AD0" stroke-dasharray="4 4"/>
-<line x1="211" y1="210" x2="211" y2="90" stroke="#229B72" stroke-dasharray="4 4"/>
-<circle cx="167" cy="154" r="4" fill="#478AD0"/><circle cx="211" cy="90" r="4" fill="#229B72"/>
-<text x="170" y="227" font-size="11" text-anchor="middle" fill="#478AD0">Qp</text><text x="215" y="227" font-size="11" text-anchor="middle" fill="#229B72">Qs</text>
-<text x="220" y="43" font-size="10" fill="#DF7846">限界私的費用 MPC</text>
-<text x="217" y="110" font-size="10" fill="#229B72">限界社会便益 MSB</text>
-<text x="252" y="187" font-size="10" fill="#478AD0">MPB</text>
-<path d="M167 154 L167 111 L211 90" fill="none" stroke="#B188DC" stroke-dasharray="3 3" stroke-width="1.6"/>
-<text x="85" y="116" font-size="10" fill="#B188DC">過少供給</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="653" viewBox="0 0 400 272" font-family="'Hiragino Sans','Noto Sans CJK JP','Yu Gothic',sans-serif">
+<rect width="400" height="272" fill="white"/>
+<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#303030"/></marker><marker id="ar2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#8a5cc0"/></marker></defs>
+<polygon points="156.1,86.5 212.7,110.4 156.1,141.4" fill="#B188DC" fill-opacity="0.35" stroke="none"/>
+<line x1="50" y1="215" x2="50" y2="18" stroke="#303030" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="50" y1="215" x2="372" y2="215" stroke="#303030" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="56.0" y="22.0" font-size="10" fill="#303030" text-anchor="start" >限界便益・限界費用</text>
+<text x="372.0" y="232.0" font-size="10" fill="#303030" text-anchor="end" >救命行為の実施量</text>
+<text x="44.0" y="226.0" font-size="10" fill="#303030" text-anchor="end" >O</text>
+<line x1="58" y1="160" x2="255" y2="52" stroke="#DF7846" stroke-width="1.8" stroke-dasharray="5 3"/>
+<line x1="58" y1="45" x2="330" y2="160" stroke="#229B72" stroke-width="2.5" />
+<line x1="58" y1="100" x2="300" y2="202" stroke="#478AD0" stroke-width="2.5" />
+<line x1="58" y1="195" x2="305" y2="60" stroke="#DF7846" stroke-width="2.5" />
+<line x1="119.9" y1="126.1" x2="119.9" y2="215" stroke="#8a5cc0" stroke-dasharray="3 3"/>
+<circle cx="119.9" cy="126.1" r="3.5" fill="#8a5cc0"/>
+<line x1="156.1" y1="141.4" x2="156.1" y2="215" stroke="#478AD0" stroke-dasharray="3 3"/>
+<circle cx="156.1" cy="141.4" r="3.5" fill="#478AD0"/>
+<line x1="212.7" y1="110.4" x2="212.7" y2="215" stroke="#229B72" stroke-dasharray="3 3"/>
+<circle cx="212.7" cy="110.4" r="3.5" fill="#229B72"/>
+<text x="119.9" y="228.0" font-size="10" fill="#8a5cc0" text-anchor="middle" >Qp′</text>
+<text x="156.1" y="228.0" font-size="10" fill="#478AD0" text-anchor="middle" >Qp</text>
+<text x="212.7" y="228.0" font-size="10" fill="#229B72" text-anchor="middle" >Qs</text>
+<text x="310.0" y="58.0" font-size="10" fill="#DF7846" text-anchor="start" >MPC</text>
+<text x="310.0" y="70.0" font-size="9" fill="#DF7846" text-anchor="start" >限界私的費用</text>
+<text x="259.0" y="50.0" font-size="10" fill="#DF7846" text-anchor="start" >MPC′</text>
+<text x="334.0" y="158.0" font-size="10" fill="#229B72" text-anchor="start" >MSB</text>
+<text x="334.0" y="170.0" font-size="9" fill="#229B72" text-anchor="start" >限界社会便益</text>
+<text x="304.0" y="198.0" font-size="10" fill="#478AD0" text-anchor="start" >MPB</text>
+<text x="304.0" y="210.0" font-size="9" fill="#478AD0" text-anchor="start" >限界私的便益</text>
+<text x="177.0" y="116.3" font-size="10" fill="#5a3a8a" text-anchor="middle" font-weight="bold">A</text>
+<text x="56.0" y="262.0" font-size="8.5" fill="#DF7846" text-anchor="start" >MPC′：傷病者が女性の場合（誤解への懸念で期待私的費用が上昇）</text>
+<text x="200.0" y="250.0" font-size="8.5" fill="#5a3a8a" text-anchor="start" >A：過少供給による厚生損失</text>
+<line x1="152.1" y1="238" x2="123.9" y2="238" stroke="#8a5cc0" stroke-width="1.2" marker-end="url(#ar2)"/>
+<text x="115.9" y="250.0" font-size="9" fill="#8a5cc0" text-anchor="end" >さらに減少</text>
+</svg>
