@@ -1,0 +1,3 @@
+02_data/** linguist-generated=true
+# Preserve the archived HTTP response byte-for-byte for SHA-256 verification.
+02_data/us/source.html binary
