@@ -14,7 +14,7 @@ python 02_compare_observed.py
 python 02_download_us.py
 ```
 
-最後のコマンドは保存済み米国HTMLを読みCSVを再生成する。HTMLがない場合のみ公表ページから取得する。
+最後のコマンドは米国の公表ページを取得して公表表CSVを再生成する。ページHTML本体は保存せず、初回取得時のSHA-256と取得日時を `manifest.json` に記録する。ページが更新されるとハッシュが変わり、CSVの値も変わり得るため、2026年11月25日更新時点の値は保存済みの `published.csv` を用いる。
 `02_compare_observed.py` は原JSONのハッシュと入力CSVを照合し、既存Shapiroコードを一時ディレクトリで再実行する。pickleは自分で取得CSVから生成した一時ファイルだけを読む。加工対応表には分類名も追加する。
 
 `02_dupor_hogan_jp.py --input-dir 02_data/raw`（`--download-only`なし）は基準VAR(12)の不安定性で停止するのが今回の正しい挙動。安全チェックを解除しない。`02_empirical_analysis.py` は不安定仕様も明示した診断専用出力であり、公開用推計を意味しない。
@@ -41,7 +41,7 @@ python 02_dupor_hogan_jp.py --input-dir /path/to/new-empty-raw --download-only
 - `02_data/coverage`：家計調査の消費支出総額（001100000）。
 - `02_data/processed`：nominal・price・real・分類名付きmapping。
 - `02_data/analysis`：18仕様の全期間・6時点・安定性・残差・予測誤差・同条件Shapiro・公式指数比較・既存Shapiro再現差・診断図。
-- `02_data/us`：米国公表ページHTML・出所とハッシュ・公表表CSV。独自再推計ではない。
+- `02_data/us`：米国公表ページの出所・取得時ハッシュ（manifest.json）と公表表CSV。ページHTML本体は再配布を避けるため保存しない。独自再推計ではない。
 
 18仕様はラグ3/6/12、月ダミーなし、過去ウェイト、2019年末まで固定推計、ラグ3/6/12×判別閾値0.1/0.15/0.3、直近5/10/15年固定窓。判別不能は残差のいずれかが標準偏差×閾値以下。5成分に押し込めず当期・過去を追加する。短い固定窓と各時点のローリングは区別する。
 

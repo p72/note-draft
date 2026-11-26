@@ -121,7 +121,7 @@
 
 ## 日米比較
 
-[セントルイス連銀の公表ページ](https://www.stlouisfed.org/research/pce-inflation-drivers)を再取得し、2026年11月25日更新・2026年10月の公表表をHTMLとCSVで保存した（`02_data/us`）。米国の独自再推計はしていない。
+[セントルイス連銀の公表ページ](https://www.stlouisfed.org/research/pce-inflation-drivers)を再取得し、2026年11月25日更新・2026年10月の公表表の数値をCSVで保存した（`02_data/us`）。ページHTML本体は再配布を避けるため保存せず、取得時のSHA-256と取得日時のみ `manifest.json` に記録した。米国の独自再推計はしていない。
 
 | 系列 | 比較時点 | 需要寄与の前年同月からの変化 | 供給寄与の前年同月からの変化 |
 | --- | --- | --- | --- |

@@ -27,15 +27,15 @@ class Tables(HTMLParser):
 
 if __name__=='__main__':
     dest=Path(__file__).resolve().parent/'02_data'/'us';dest.mkdir(parents=True,exist_ok=True)
-    if (dest/'source.html').exists():
-        payload=(dest/'source.html').read_bytes()
-        record=json.loads((dest/'manifest.json').read_text())
-        if hashlib.sha256(payload).hexdigest()!=record['sha256']:
-            raise ValueError('US archive hash mismatch')
+    # 第三者ページの再配布を避けるため、HTML本体は保存せずハッシュと取得日時だけ記録する。
+    response=requests.get(URL,timeout=40);response.raise_for_status();payload=response.content
+    digest=hashlib.sha256(payload).hexdigest()
+    manifest=dest/'manifest.json'
+    if manifest.exists():
+        if json.loads(manifest.read_text())['sha256']!=digest:
+            print('note: page content differs from the archived manifest (page updated since retrieval)')
     else:
-        response=requests.get(URL,timeout=40);response.raise_for_status();payload=response.content
-        (dest/'source.html').write_bytes(payload)
-        (dest/'manifest.json').write_text(json.dumps(dict(url=URL,retrieved_at=datetime.now(timezone.utc).isoformat(),sha256=hashlib.sha256(payload).hexdigest()),indent=2)+'\n')
+        manifest.write_text(json.dumps(dict(url=URL,retrieved_at=datetime.now(timezone.utc).isoformat(),sha256=digest),indent=2)+'\n')
     p=Tables();p.feed(payload.decode('utf-8'))
     table=next(t for t in p.tables if any(r and r[0]=='Inflation (Total)' for r in t))
     if not any(r==['October 2026','October 2025','October 2026','October 2025'] for r in table):
