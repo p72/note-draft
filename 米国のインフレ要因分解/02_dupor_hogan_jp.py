@@ -8,6 +8,7 @@ import argparse
 import os
 import json
 import hashlib
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -33,8 +34,10 @@ def get_table(table, raw_dir=None, **filters):
     app_id = os.environ.get("ESTAT_APP_ID", "").strip()
     if not app_id:
         raise RuntimeError("Set the ESTAT_APP_ID environment variable before downloading")
+    if raw_dir is not None and list(Path(raw_dir).glob(f"{table}_*.json")):
+        raise ValueError("Raw table archive already exists; use a new directory")
     endpoint = "https://api.e-stat.go.jp/rest/3.0/app/json/getStatsData"
-    values = []
+    pages = []
     start = 1
     while True:
         # requests exceptions can contain the credential-bearing request URL.
@@ -60,24 +63,62 @@ def get_table(table, raw_dir=None, **filters):
                           sha256=hashlib.sha256(payload).hexdigest())
             with (dest/"manifest.jsonl").open("a", encoding="utf-8") as f:
                 f.write(json.dumps(record, ensure_ascii=False)+"\n")
-        v = data["DATA_INF"]["VALUE"]
-        values.extend(v if isinstance(v, list) else [v])
+        pages.append(data)
         nxt = data["RESULT_INF"].get("NEXT_KEY")
         if nxt is None:
             break
         start = int(nxt)
+    return parse_pages(pages)
+
+
+def parse_pages(pages):
+    """Use published time labels, excluding annual/fiscal averages explicitly."""
+    values, months, names = [], {}, {}
+    for data in pages:
+        v = data["DATA_INF"]["VALUE"]
+        values.extend(v if isinstance(v, list) else [v])
+        for obj in data["CLASS_INF"]["CLASS_OBJ"]:
+            classes = obj["CLASS"]
+            classes = classes if isinstance(classes, list) else [classes]
+            if obj["@id"] == "time":
+                for c in classes:
+                    match = re.fullmatch(r"(\d{4})年(\d{1,2})月", c["@name"])
+                    if match:
+                        year, month = map(int, match.groups())
+                        months[c["@code"]] = pd.Period(year=year, month=month, freq="M")
+                    elif not re.fullmatch(r"\d{4}年(?:度)?", c["@name"]):
+                        raise ValueError("Unrecognized time label: " + c["@name"])
+            if obj["@id"] == "cat01":
+                names.update({c["@code"]: c["@name"] for c in classes})
     df = pd.DataFrame(values)
+    df = df[df["@time"].isin(months)].copy()
+    if df.empty:
+        raise ValueError("No monthly observations")
     df["value"] = pd.to_numeric(df["$"], errors="coerce")
-    # e-Stat monthly time codes use YYYYMM0000 or YYYY00MM00.
-    raw = df["@time"].astype(str).str.zfill(10)
-    first = raw.str.slice(4,6).astype(int)
-    second = raw.str.slice(6,8).astype(int)
-    month = first.where(first.between(1,12), second)
-    if not month.between(1,12).all():
-        raise ValueError("Unexpected e-Stat time encoding")
-    df.index = pd.PeriodIndex(year=raw.str[:4].astype(int), month=month, freq="M")
+    df.index = pd.PeriodIndex(df["@time"].map(months), freq="M")
+    df.index.name = "period"
     df["cat01_code"] = df["@cat01"].astype(str)
+    df["cat01_name"] = df["cat01_code"].map(names)
     return df
+
+
+def load_saved_table(folder, table):
+    """Verify archived page hashes and contiguous pagination before parsing."""
+    folder = Path(folder)
+    records = [json.loads(line) for line in (folder/"manifest.jsonl").read_text().splitlines()]
+    records = sorted((r for r in records if r["table"] == table), key=lambda r: r["start"])
+    pages, expected = [], 1
+    for r in records:
+        payload = (folder/r["file"]).read_bytes()
+        if hashlib.sha256(payload).hexdigest() != r["sha256"] or r["start"] != expected:
+            raise ValueError("Archive hash/pagination mismatch")
+        page = json.loads(payload)
+        pages.append(page)
+        expected = page["RESULT_INF"].get("NEXT_KEY")
+        expected = int(expected) if expected is not None else None
+    if not pages or expected is not None:
+        raise ValueError("Incomplete archive")
+    return parse_pages(pages)
 
 def load_panel(input_dir=None, raw_dir=None):
     if input_dir:
@@ -85,6 +126,11 @@ def load_panel(input_dir=None, raw_dir=None):
         if (folder / "kakei.csv").exists() and (folder / "cpi.csv").exists():
             k = pd.read_csv(folder/"kakei.csv", index_col=0, dtype={"cat01_code":str})
             c = pd.read_csv(folder/"cpi.csv", index_col=0, dtype={"cat01_code":str})
+        elif (folder / "manifest.jsonl").exists():
+            k = load_saved_table(folder, "0004023601")
+            c = load_saved_table(folder, "0003427113")
+            k.to_csv(folder/"kakei.csv")
+            c.to_csv(folder/"cpi.csv")
         else:
             k = pd.read_pickle(folder / "kakei_0004023601.pkl")
             c = pd.read_pickle(folder / "cpi_idx.pkl")
@@ -125,7 +171,7 @@ def load_panel(input_dir=None, raw_dir=None):
         raise ValueError("Nonpositive price or spending")
     return nominal, price
 
-def decompose(y, lag=12, seasonal=True, tax=None, fit_end=None):
+def decompose(y, lag=12, seasonal=True, tax=None, fit_end=None, details=False):
     """OLS fixed-sample VAR. Drift includes deterministic path and initial history.
     Recursion is exactly equivalent to the finite-sample MA representation.
     Tax dummies (if enabled) are deterministic controls, not structural shocks.
@@ -170,6 +216,8 @@ def decompose(y, lag=12, seasonal=True, tax=None, fit_end=None):
         d[t] = cd+pd_; s[t] = cs+ps_
         out[t] = [drift[t,0],cd[0],cs[0],pd_[0],ps_[0]]
     np.testing.assert_allclose(out[lag:].sum(1), y[lag:,0], atol=1e-8, rtol=1e-8)
+    if details:
+        return out, float(rho), dict(A=A, residual=residual, fitted=X@B, nfit=int(fit.sum()), rank=int(keep.sum()))
     return out, float(rho)
 
 def run(nominal, price, lag=12, fit_end=None, seasonal=True, weights="geometric"):

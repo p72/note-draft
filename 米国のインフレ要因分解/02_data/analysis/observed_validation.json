@@ -1,0 +1,40 @@
+{
+  "kakei": {
+    "monthly_rows": 15087,
+    "start": "2000-01",
+    "end": "2026-09"
+  },
+  "cpi": {
+    "monthly_rows": 30438,
+    "start": "1970-01",
+    "end": "2026-10"
+  },
+  "official": {
+    "monthly_rows": 1364,
+    "start": "1970-01",
+    "end": "2026-10"
+  },
+  "consumption": {
+    "monthly_rows": 321,
+    "start": "2000-01",
+    "end": "2026-09"
+  },
+  "shapiro_max_abs_error_vs_rounded_csv": 0.0004983035562374782,
+  "official_since_2015": {
+    "0001": {
+      "correlation": 0.985412394793707,
+      "mean_gap_log_pp": -0.0486474465392984,
+      "rmse_log_pp": 0.2703874547562124
+    },
+    "0163": {
+      "correlation": 0.9876330014517292,
+      "mean_gap_log_pp": -0.27314235076767374,
+      "rmse_log_pp": 0.38005829792835294
+    }
+  },
+  "household_spending_coverage": {
+    "min": 0.8108231470451132,
+    "max": 0.948033681048364,
+    "mean": 0.8914414726782869
+  }
+}

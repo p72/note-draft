@@ -73,7 +73,52 @@ def check_panel():
             raise AssertionError("Missing observation accepted")
     print("PASS: CSV code preservation, 47-to-45 mapping and missing-data rejection")
 
-if __name__=="__main__":
+
+
+def check_time_labels():
+    # Fiscal-year code 2020100000 used to be misread as October.
+    classes=[{'@code':'2020000101','@name':'2020年1月'},
+             {'@code':'2020000000','@name':'2020年'},
+             {'@code':'2020100000','@name':'2020年度'}]
+    page={'CLASS_INF':{'CLASS_OBJ':[{'@id':'time','CLASS':classes},
+          {'@id':'cat01','CLASS':{'@code':'0003','@name':'穀類'}}]},
+          'DATA_INF':{'VALUE':[{'@time':c['@code'],'@cat01':'0003','$':str(i+1)} for i,c in enumerate(classes)]}}
+    parsed=dh.parse_pages([page])
+    assert len(parsed)==1 and str(parsed.index[0])=='2020-01' and parsed.iloc[0].value==1
+    classes[0]['@name']='unknown'
+    try:
+        dh.parse_pages([page])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Unknown time label accepted')
+    print('PASS: monthly labels only; annual and fiscal rows excluded')
+
+
+def check_unclear_ma():
+    spec = importlib.util.spec_from_file_location('emp',Path(__file__).with_name('02_empirical_analysis.py'))
+    emp = importlib.util.module_from_spec(spec);spec.loader.exec_module(emp)
+    rng=np.random.default_rng(918)
+    y=rng.normal(size=(110,2))
+    for t in range(1,len(y)):
+        y[t]+=.3*y[t-1]
+    out,_,info=dh.decompose(y,3,False,details=True)
+    result,mask=emp.unclear_path(y,info,out,3,.3)
+    e=info['residual'].copy(); e[~mask]=0
+    psi=[np.eye(2)]
+    for h in range(1,len(e)):
+        psi.append(sum(info['A'][j-1]@psi[h-j] for j in range(1,min(h,3)+1)))
+    for t in range(len(e)):
+        expected=sum((psi[h]@e[t-h])[0] for h in range(t+1))
+        np.testing.assert_allclose(result[t+3,5:7].sum(),expected,atol=1e-10)
+    zero,_=emp.unclear_path(y,info,out,3,0)
+    np.testing.assert_allclose(zero[:,:5],out,atol=1e-10)
+    assert mask.any() and (~mask).any()
+    print('PASS: unclear innovations retain independent MA propagation; zero threshold recovers baseline')
+
+if __name__=='__main__':
     check_ma()
     check_credentials()
     check_panel()
+    check_time_labels()
+    check_unclear_ma()
